@@ -316,9 +316,6 @@ h3 { font-size: 15px; color: var(--neon-pink); letter-spacing: 0; margin-bottom:
       </div>
       <div class="toggle-row"><label>Sound effects</label><div class="toggle on" id="soundToggle" data-on="true"></div></div>
       <div class="toggle-row"><label>Biometric unlock (Face ID / Touch ID)</label><div class="toggle" id="biometricToggle" data-on="false"></div></div>
-      <div class="info-row" style="margin-top:8px;"><span class="info-label">Two-factor authentication</span><span class="info-value" id="info2FAStatus">—</span></div>
-      <button class="secondary" id="setup2FABtn" style="width:100%;margin-top:8px;">Set up 2FA</button>
-      <button class="danger" id="disable2FABtn" style="width:100%;margin-top:8px;display:none;">Disable 2FA</button>
 
       <hr>
       <h3>Privacy</h3>
@@ -878,43 +875,6 @@ async function changeAccountEmail(newEmail) {
   }
 }
 
-async function start2FAEnrollment(phoneNumber) {
-  const user = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
-  if(!user) throw new Error('Not signed in to cloud yet');
-  if(!phoneNumber || !phoneNumber.startsWith('+')) throw new Error('Use international format like +1 555 123 4567');
-  const session = await user.multiFactor.getSession();
-  if(!recaptchaVerifier) {
-    recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptchaContainer', { size: 'invisible' });
-  }
-  const phoneAuthProvider = new firebase.auth.PhoneAuthProvider();
-  const verificationId = await phoneAuthProvider.verifyPhoneNumber({ phoneNumber, session }, recaptchaVerifier);
-  return verificationId;
-}
-
-async function complete2FAEnrollment(verificationId, code) {
-  const user = firebase.auth().currentUser;
-  const cred = firebase.auth.PhoneAuthProvider.credential(verificationId, code);
-  const assertion = firebase.auth.PhoneMultiFactorGenerator.assertion(cred);
-  await user.multiFactor.enroll(assertion, 'My phone');
-}
-
-async function disable2FA() {
-  const user = firebase.auth().currentUser;
-  if(!user || !user.multiFactor) return;
-  const factors = user.multiFactor.enrolledFactors || [];
-  for(const factor of factors) {
-    await user.multiFactor.unenroll(factor);
-  }
-}
-
-function update2FAStatus() {
-  const user = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
-  const enrolled = !!(user && user.multiFactor && (user.multiFactor.enrolledFactors||[]).length > 0);
-  $('info2FAStatus').textContent = enrolled ? '✓ Enabled' : 'Not set up';
-  $('setup2FABtn').style.display = enrolled ? 'none' : 'block';
-  $('disable2FABtn').style.display = enrolled ? 'block' : 'none';
-}
-
 function updateEmailVerifiedStatus() {
   const user = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
   if(!user) {
@@ -1256,34 +1216,6 @@ $('changeEmailBtn').addEventListener('click', async () => {
   } catch(e) { toast(e.message||'Could not change email','error','error'); }
 });
 
-$('setup2FABtn').addEventListener('click', async () => {
-  sfx('click');
-  const user = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
-  if(!user) { toast('Sign in to cloud first','warning','warning'); return; }
-  const phone = prompt('Enter your phone number in international format (e.g. +1 555 123 4567):');
-  if(!phone) return;
-  try {
-    const verificationId = await start2FAEnrollment(phone.trim());
-    const code = prompt('Enter the 6-digit code we just texted to '+phone+':');
-    if(!code) return;
-    await complete2FAEnrollment(verificationId, code.trim());
-    toast('2FA enabled','achievement','achievement');
-    update2FAStatus();
-  } catch(e) {
-    if(e.code === 'auth/requires-recent-login') toast('Sign out and back in, then try again','warning','warning');
-    else toast('Setup failed: '+(e.message||'unknown'),'error','error');
-  }
-});
-
-$('disable2FABtn').addEventListener('click', async () => {
-  sfx('click');
-  if(!confirm('Disable 2FA? You will only need your password to sign in afterward.')) return;
-  try {
-    await disable2FA();
-    toast('2FA disabled','system');
-    update2FAStatus();
-  } catch(e) { toast('Could not disable: '+(e.message||'unknown'),'error','error'); }
-});
 $('resetVaultBtn').addEventListener('click', () => {
   if(!confirm('Delete EVERYTHING and start fresh? Any saved passwords will be gone forever. Continue?')) return;
   localStorage.removeItem(STORAGE_KEY);
@@ -1319,7 +1251,6 @@ $('settingsBtn').addEventListener('click', () => {
   if(isBiometricEnrolled()){ bio.classList.add('on'); bio.dataset.on='true'; } else { bio.classList.remove('on'); bio.dataset.on='false'; }
   $('newEmailInput').value = '';
   updateEmailVerifiedStatus();
-  update2FAStatus();
   updateCloudStatus();
   $('settingsModal').classList.add('active');
 });
@@ -1471,9 +1402,12 @@ async function cloudPull() {
 async function cloudSyncOnUnlock(masterPw) {
   if(!cloudReady) return;
   try {
-    const email=vault.settings?.email;
-    if(!email){ console.warn('No email — cloud sync skipped'); return; }
-    await cloudSignInOrCreate(email, masterPw);
+    // If already signed in via OAuth, skip the email/password auth step
+    if(!cloudUser) {
+      const email=vault.settings?.email;
+      if(!email){ console.warn('No email — cloud sync skipped'); return; }
+      await cloudSignInOrCreate(email, masterPw);
+    }
     const cloud=await cloudPull();
     const local=loadVaultBlob();
     const localTime=local?.savedAt||0;
