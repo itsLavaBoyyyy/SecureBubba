@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SecureBubba">
+<meta name="theme-color" content="#0a0612">
+<title>SecureBubba</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0612; --bg-2: #050310;
+  --surface: rgba(20, 16, 42, 0.85);
+  --surface-2: rgba(35, 25, 60, 0.55);
+  --surface-3: rgba(50, 35, 85, 0.5);
+  --border: rgba(5, 217, 232, 0.22);
+  --border-strong: rgba(5, 217, 232, 0.5);
+  --text: #e8e6ff; --text-dim: #8b85b8;
+  --neon-pink: #ff2a6d; --neon-cyan: #05d9e8;
+  --neon-purple: #d300c5; --neon-green: #39ff14;
+  --neon-yellow: #f9f871;
+  --accent: var(--neon-cyan);
+  --danger: #ff3864; --success: var(--neon-green); --warning: var(--neon-yellow);
+  --font-display: 'Orbitron', 'Rajdhani', system-ui, sans-serif;
+  --font-mono: 'Share Tech Mono', 'SF Mono', ui-monospace, monospace;
+  --font-body: 'Rajdhani', -apple-system, system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: var(--font-body); background: var(--bg-2); color: var(--text); font-size: 16px; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; position: relative; }
+input, textarea { user-select: text; -webkit-user-select: text; font-family: var(--font-mono); }
+.bg-fx { position: fixed; inset: 0; z-index: -2; pointer-events: none; background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 42, 109, 0.18), transparent 60%), radial-gradient(ellipse 80% 50% at 50% 100%, rgba(5, 217, 232, 0.16), transparent 60%), linear-gradient(180deg, #0a0612 0%, #050310 100%); }
+.bg-grid { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.bg-grid::before { content: ''; position: absolute; left: -50%; right: -50%; bottom: -10%; height: 80%; background-image: linear-gradient(rgba(5, 217, 232, 0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(5, 217, 232, 0.18) 1px, transparent 1px); background-size: 60px 60px; transform: perspective(700px) rotateX(60deg); transform-origin: center top; mask-image: linear-gradient(180deg, transparent 0%, black 25%, black 75%, transparent 100%); -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 25%, black 75%, transparent 100%); animation: grid-scroll 8s linear infinite; }
+@keyframes grid-scroll { from { background-position: 0 0; } to { background-position: 0 60px; } }
+.bg-scanlines { position: fixed; inset: 0; z-index: 1000; pointer-events: none; background: repeating-linear-gradient(180deg, transparent 0, transparent 2px, rgba(0, 0, 0, 0.18) 3px); mix-blend-mode: multiply; }
+.bg-vignette { position: fixed; inset: 0; z-index: 999; pointer-events: none; background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5) 100%); }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 700; letter-spacing: 0.05em; }
+button { background: rgba(5, 217, 232, 0.06); border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 11px 18px; border-radius: 4px; cursor: pointer; min-height: 44px; font-family: var(--font-display); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.12em; text-shadow: 0 0 8px currentColor; box-shadow: inset 0 0 12px rgba(5, 217, 232, 0.08); transition: box-shadow 0.15s, background 0.15s, transform 0.05s; }
+button:hover { background: rgba(5, 217, 232, 0.14); box-shadow: 0 0 20px rgba(5, 217, 232, 0.45), inset 0 0 12px rgba(5, 217, 232, 0.18); }
+button:active { transform: translateY(1px); opacity: 0.85; }
+button.secondary { border-color: rgba(139, 133, 184, 0.5); color: var(--text); background: rgba(50, 35, 85, 0.3); text-shadow: none; box-shadow: none; }
+button.secondary:hover { border-color: var(--neon-cyan); color: var(--neon-cyan); text-shadow: 0 0 6px currentColor; }
+button.danger { border-color: var(--danger); color: var(--danger); background: rgba(255, 56, 100, 0.08); }
+button.danger:hover { box-shadow: 0 0 20px rgba(255, 56, 100, 0.5); background: rgba(255, 56, 100, 0.18); }
+button.primary { border-color: var(--neon-pink); color: var(--neon-pink); background: rgba(255, 42, 109, 0.1); }
+button.primary:hover { box-shadow: 0 0 22px rgba(255, 42, 109, 0.55); background: rgba(255, 42, 109, 0.18); }
+button.ghost { background: transparent; border-color: transparent; color: var(--text-dim); text-shadow: none; box-shadow: none; }
+button.ghost:hover { color: var(--neon-cyan); text-shadow: 0 0 6px currentColor; background: transparent; box-shadow: none; }
+input, textarea, select { background: rgba(0, 0, 0, 0.45); border: 1px solid var(--border); border-radius: 4px; padding: 12px 14px; width: 100%; min-height: 44px; color: var(--text); font-size: 16px; font-family: var(--font-mono); letter-spacing: 0.02em; transition: border-color 0.15s, box-shadow 0.15s; }
+input::placeholder, textarea::placeholder { color: rgba(139, 133, 184, 0.6); }
+textarea { resize: vertical; min-height: 80px; }
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--neon-cyan); box-shadow: 0 0 14px rgba(5, 217, 232, 0.4), inset 0 0 8px rgba(5, 217, 232, 0.05); }
+select { appearance: none; -webkit-appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--neon-cyan) 50%), linear-gradient(135deg, var(--neon-cyan) 50%, transparent 50%); background-position: calc(100% - 18px) 50%, calc(100% - 12px) 50%; background-size: 6px 6px, 6px 6px; background-repeat: no-repeat; padding-right: 36px; }
+.lock-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 24px; position: relative; }
+.lock-logo { width: 110px; height: 110px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; position: relative; animation: logo-pulse 3s ease-in-out infinite; }
+@keyframes logo-pulse { 0%, 100% { filter: drop-shadow(0 0 12px rgba(5, 217, 232, 0.5)) drop-shadow(0 0 20px rgba(255, 42, 109, 0.3)); } 50% { filter: drop-shadow(0 0 20px rgba(5, 217, 232, 0.8)) drop-shadow(0 0 30px rgba(255, 42, 109, 0.5)); } }
+.lock-logo svg { width: 100%; height: 100%; }
+.lock-screen h1 { font-family: var(--font-display); font-size: 36px; font-weight: 900; letter-spacing: 0.18em; background: linear-gradient(90deg, var(--neon-pink), var(--neon-cyan)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; text-shadow: 0 0 30px rgba(5, 217, 232, 0.3); }
+.lock-screen .subtitle { font-family: var(--font-mono); color: var(--neon-cyan); font-size: 13px; margin-bottom: 36px; text-align: center; letter-spacing: 0.05em; text-shadow: 0 0 8px rgba(5, 217, 232, 0.5); }
+.lock-screen .subtitle::after { content: '_'; animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.lock-screen form { width: 100%; max-width: 400px; }
+.lock-screen input { margin-bottom: 12px; }
+.app { display: none; height: 100%; flex-direction: column; }
+.app.active { display: flex; }
+.header { display: flex; align-items: center; gap: 4px; padding: 14px 16px; background: rgba(10, 6, 18, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding-top: max(14px, env(safe-area-inset-top)); position: relative; }
+.header::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent); box-shadow: 0 0 8px var(--neon-cyan); }
+.header-brand { flex: 1; display: flex; align-items: baseline; gap: 8px; }
+.header-brand .name { font-family: var(--font-display); font-size: 18px; font-weight: 900; letter-spacing: 0.16em; background: linear-gradient(90deg, var(--neon-pink), var(--neon-cyan)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.header-brand .ver { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); letter-spacing: 0.1em; }
+.icon-btn { background: transparent; border: 1px solid transparent; padding: 0; min-height: 40px; min-width: 40px; display: flex; align-items: center; justify-content: center; border-radius: 4px; color: var(--neon-cyan); font-size: 18px; font-family: var(--font-mono); text-shadow: 0 0 6px currentColor; box-shadow: none; }
+.icon-btn:hover { background: rgba(5, 217, 232, 0.1); border-color: var(--border-strong); box-shadow: none; }
+.search-bar { padding: 12px 16px; background: rgba(10, 6, 18, 0.5); border-bottom: 1px solid var(--border); }
+.search-bar input { background: rgba(0, 0, 0, 0.5); }
+.tabs { display: flex; gap: 2px; padding: 0 8px; background: rgba(10, 6, 18, 0.5); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { background: transparent; color: var(--text-dim); border: none; border-bottom: 2px solid transparent; border-radius: 0; padding: 12px 14px; min-height: 44px; white-space: nowrap; font-size: 12px; font-family: var(--font-display); font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; text-shadow: none; box-shadow: none; }
+.tab:hover { color: var(--text); background: transparent; box-shadow: none; }
+.tab.active { color: var(--neon-cyan); border-bottom-color: var(--neon-cyan); text-shadow: 0 0 8px currentColor; background: transparent; box-shadow: 0 4px 12px -8px var(--neon-cyan); }
+.list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; position: relative; border-left: 2px solid transparent; transition: background 0.12s, border-left-color 0.12s; }
+.item:hover, .item:active { background: rgba(5, 217, 232, 0.06); border-left-color: var(--neon-cyan); }
+.item .icon-wrap { width: 48px; height: 48px; background: rgba(5, 217, 232, 0.08); border: 1px solid var(--border-strong); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 11px; font-weight: 800; color: var(--neon-cyan); text-shadow: 0 0 8px currentColor; flex-shrink: 0; letter-spacing: 0.04em; clip-path: polygon(8% 0, 92% 0, 100% 50%, 92% 100%, 8% 100%, 0 50%); }
+.item .icon-wrap.t-card { color: var(--neon-purple); border-color: rgba(211, 0, 197, 0.4); background: rgba(211, 0, 197, 0.08); }
+.item .icon-wrap.t-identity { color: var(--neon-yellow); border-color: rgba(249, 248, 113, 0.4); background: rgba(249, 248, 113, 0.06); }
+.item .icon-wrap.t-note { color: var(--neon-green); border-color: rgba(57, 255, 20, 0.35); background: rgba(57, 255, 20, 0.06); }
+.item .info { flex: 1; min-width: 0; }
+.item .title { font-family: var(--font-display); font-weight: 600; font-size: 16px; letter-spacing: 0.02em; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+.item .subtitle { color: var(--text-dim); font-size: 13px; font-family: var(--font-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item .chev { color: var(--neon-cyan); font-size: 14px; font-family: var(--font-mono); text-shadow: 0 0 6px currentColor; }
+.fab { position: fixed; bottom: 24px; right: 24px; bottom: max(24px, env(safe-area-inset-bottom)); width: 60px; height: 60px; font-size: 28px; padding: 0; border: 2px solid var(--neon-pink); background: rgba(255, 42, 109, 0.18); color: var(--neon-pink); text-shadow: 0 0 12px currentColor; box-shadow: 0 0 24px rgba(255, 42, 109, 0.5), inset 0 0 16px rgba(255, 42, 109, 0.15); border-radius: 4px; z-index: 50; font-family: var(--font-display); font-weight: 900; letter-spacing: 0; clip-path: polygon(15% 0, 85% 0, 100% 50%, 85% 100%, 15% 100%, 0 50%); }
+.fab:hover { background: rgba(255, 42, 109, 0.3); box-shadow: 0 0 36px rgba(255, 42, 109, 0.8), inset 0 0 20px rgba(255, 42, 109, 0.25); }
+.modal-bg { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); display: none; align-items: flex-end; justify-content: center; z-index: 100; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+.modal-bg.active { display: flex; animation: fadeIn 0.2s; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal { background: linear-gradient(180deg, rgba(20, 16, 42, 0.97), rgba(10, 6, 18, 0.97)); border: 1px solid var(--border-strong); border-radius: 8px 8px 0 0; width: 100%; max-width: 720px; max-height: 92vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 -10px 40px rgba(5, 217, 232, 0.2), 0 0 60px rgba(255, 42, 109, 0.1); animation: slideUp 0.25s cubic-bezier(0.2, 0.8, 0.4, 1); position: relative; }
+.modal::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--neon-pink), var(--neon-cyan)); box-shadow: 0 0 12px var(--neon-cyan); }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@media (min-width: 768px) { .modal-bg { align-items: center; padding: 24px; } .modal { border-radius: 8px; max-height: 88vh; } }
+.modal-header { display: flex; align-items: center; gap: 8px; padding: 12px 12px 12px 8px; border-bottom: 1px solid var(--border); background: rgba(0, 0, 0, 0.3); }
+.modal-header h2 { flex: 1; font-size: 13px; font-weight: 700; font-family: var(--font-display); letter-spacing: 0.18em; color: var(--neon-cyan); text-shadow: 0 0 8px currentColor; text-align: center; padding: 0 8px; text-transform: uppercase; }
+.modal-body { padding: 18px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+.modal-footer { padding: 12px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom)); border-top: 1px solid var(--border); display: flex; gap: 8px; background: rgba(0, 0, 0, 0.3); }
+.modal-footer button { flex: 1; }
+.field { margin-bottom: 18px; }
+.field label { display: block; font-size: 11px; color: var(--neon-cyan); margin-bottom: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; font-family: var(--font-display); text-shadow: 0 0 6px rgba(5, 217, 232, 0.4); }
+.field-row { display: flex; gap: 6px; align-items: stretch; }
+.field-row > input, .field-row > select { flex: 1; min-width: 0; }
+.field-row > button { padding: 0 14px; min-width: 44px; flex-shrink: 0; font-size: 11px; }
+.password-strength { height: 3px; background: rgba(0, 0, 0, 0.5); border-radius: 2px; margin-top: 8px; overflow: hidden; border: 1px solid var(--border); }
+.password-strength-bar { height: 100%; transition: width 0.3s, background 0.3s; width: 0%; box-shadow: 0 0 8px currentColor; }
+.helper-row { font-size: 12px; margin-top: 6px; font-family: var(--font-mono); display: flex; justify-content: space-between; gap: 8px; }
+.totp-display { background: rgba(0, 0, 0, 0.5); border: 1px solid var(--neon-pink); padding: 14px 16px; border-radius: 4px; display: flex; align-items: center; gap: 14px; margin-top: 10px; cursor: pointer; box-shadow: 0 0 16px rgba(255, 42, 109, 0.25), inset 0 0 12px rgba(255, 42, 109, 0.05); position: relative; overflow: hidden; }
+.totp-display::before { content: '2FA CODE'; position: absolute; top: 4px; left: 8px; font-family: var(--font-display); font-size: 9px; color: var(--neon-pink); letter-spacing: 0.2em; opacity: 0.7; }
+.totp-code { font-size: 30px; font-weight: 700; letter-spacing: 4px; font-family: var(--font-mono); flex: 1; color: var(--neon-pink); text-shadow: 0 0 12px currentColor; margin-top: 8px; }
+.totp-timer { width: 38px; height: 38px; border-radius: 19px; display: flex; align-items: center; justify-content: center; position: relative; flex-shrink: 0; margin-top: 8px; }
+.totp-timer::before { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: rgba(0, 0, 0, 0.85); }
+.totp-timer span { position: relative; font-size: 12px; font-weight: 700; font-family: var(--font-mono); color: var(--neon-pink); text-shadow: 0 0 6px currentColor; }
+.toast { position: fixed; top: 24px; right: 24px; top: max(24px, calc(env(safe-area-inset-top) + 12px)); background: linear-gradient(135deg, rgba(20, 16, 42, 0.97), rgba(10, 6, 18, 0.97)); border: 1px solid var(--neon-cyan); border-left: 4px solid var(--neon-pink); color: var(--text); padding: 12px 18px 12px 16px; border-radius: 4px; box-shadow: 0 0 28px rgba(5, 217, 232, 0.45), 0 8px 16px rgba(0, 0, 0, 0.5); transform: translateX(150%); transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.4, 1); display: flex; flex-direction: column; gap: 2px; max-width: 320px; min-width: 220px; z-index: 200; }
+.toast.show { transform: translateX(0); }
+.toast.t-warning { border-color: var(--neon-yellow); border-left-color: var(--neon-yellow); box-shadow: 0 0 24px rgba(249, 248, 113, 0.4), 0 8px 16px rgba(0, 0, 0, 0.5); }
+.toast.t-error { border-color: var(--danger); border-left-color: var(--danger); box-shadow: 0 0 24px rgba(255, 56, 100, 0.4), 0 8px 16px rgba(0, 0, 0, 0.5); }
+.toast.t-achievement { border-color: var(--neon-pink); border-left-color: var(--neon-yellow); box-shadow: 0 0 30px rgba(255, 42, 109, 0.5), 0 8px 16px rgba(0, 0, 0, 0.5); }
+.toast.t-intel { border-color: var(--neon-green); border-left-color: var(--neon-cyan); box-shadow: 0 0 24px rgba(57, 255, 20, 0.4), 0 8px 16px rgba(0, 0, 0, 0.5); }
+.toast .toast-label { font-family: var(--font-display); font-size: 10px; letter-spacing: 0.22em; color: var(--neon-pink); text-shadow: 0 0 6px currentColor; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+.toast.t-warning .toast-label { color: var(--neon-yellow); }
+.toast.t-error .toast-label { color: var(--danger); }
+.toast.t-achievement .toast-label { color: var(--neon-yellow); }
+.toast.t-intel .toast-label { color: var(--neon-green); }
+.toast .toast-msg { font-family: var(--font-mono); font-size: 14px; color: var(--text); }
+.empty { padding: 80px 24px; text-align: center; color: var(--text-dim); font-family: var(--font-mono); }
+.empty .icon-big { font-size: 32px; margin-bottom: 16px; font-family: var(--font-display); font-weight: 900; color: var(--neon-cyan); text-shadow: 0 0 14px currentColor; letter-spacing: 0.1em; }
+.empty .title { font-size: 15px; font-weight: 700; font-family: var(--font-display); letter-spacing: 0.12em; color: var(--text); margin-bottom: 8px; text-transform: uppercase; }
+.empty .sub { font-size: 13px; }
+hr { border: none; border-top: 1px solid var(--border); margin: 22px 0; box-shadow: 0 0 6px var(--neon-cyan); }
+h3 { font-size: 11px; color: var(--neon-pink); text-transform: uppercase; letter-spacing: 0.22em; margin-bottom: 14px; font-weight: 700; font-family: var(--font-display); text-shadow: 0 0 6px currentColor; }
+.row-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+.row-buttons button { flex: 1; min-width: 140px; }
+.toggle-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.toggle-row label { flex: 1; font-family: var(--font-display); font-size: 13px; color: var(--text); text-transform: uppercase; letter-spacing: 0.08em; }
+.toggle { width: 48px; height: 26px; background: rgba(0,0,0,0.6); border: 1px solid var(--border); border-radius: 13px; position: relative; cursor: pointer; transition: background 0.15s, border-color 0.15s, box-shadow 0.15s; flex-shrink: 0; }
+.toggle::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: var(--text-dim); top: 3px; left: 3px; transition: transform 0.18s, background 0.18s; }
+.toggle.on { background: rgba(5, 217, 232, 0.2); border-color: var(--neon-cyan); box-shadow: 0 0 12px rgba(5, 217, 232, 0.4); }
+.toggle.on::after { transform: translateX(22px); background: var(--neon-cyan); box-shadow: 0 0 8px currentColor; }
+.term-text { font-family: var(--font-mono); color: var(--text-dim); font-size: 13px; }
+.avatar-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.avatar-option { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 24px; background: rgba(0,0,0,0.45); border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s, transform 0.05s; user-select: none; -webkit-user-select: none; }
+.avatar-option:hover { border-color: var(--neon-cyan); }
+.avatar-option:active { transform: scale(0.95); }
+.avatar-option.selected { border-color: var(--neon-pink); box-shadow: 0 0 14px rgba(255, 42, 109, 0.6); background: rgba(255, 42, 109, 0.08); }
+.info-row { display: flex; justify-content: space-between; padding: 8px 2px; border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 13px; }
+.info-row:last-child { border-bottom: none; }
+.info-label { color: var(--text-dim); }
+.info-value { color: var(--text); text-align: right; }
+.header-avatar { font-size: 22px; margin-right: 6px; filter: drop-shadow(0 0 8px var(--neon-cyan)); display: none; line-height: 1; }
+.header-avatar.shown { display: inline-block; }
+.oauth-divider { text-align: center; margin: 18px 0 12px; color: var(--text-dim); font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em; position: relative; }
+.oauth-divider::before, .oauth-divider::after { content: ''; position: absolute; top: 50%; width: calc(50% - 70px); height: 1px; background: var(--border); }
+.oauth-divider::before { left: 0; }
+.oauth-divider::after { right: 0; }
+.oauth-buttons { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+.oauth-btn {
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 16px; min-height: 44px;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 14px; font-weight: 500;
+  letter-spacing: 0; text-transform: none;
+  text-shadow: none; box-shadow: none;
+  border-radius: 4px; width: 100%;
+  justify-content: flex-start;
+  transition: filter 0.15s, transform 0.05s;
+}
+.oauth-btn:hover { filter: brightness(1.08); box-shadow: none; }
+.oauth-btn:active { transform: scale(0.98); }
+.oauth-logo { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.oauth-logo svg { width: 100%; height: 100%; display: block; }
+.oauth-label { flex: 1; text-align: center; padding-right: 22px; }
+/* Google: dark theme button per Google brand guidelines */
+.oauth-btn.google { background: #131314; color: #e3e3e3; border: 1px solid #8e918f; }
+.oauth-btn.google:hover { background: #1c1c1f; }
+/* Phone: neutral dark with cyan accent */
+.oauth-btn.phone { background: #0a0612; color: var(--neon-cyan); border: 1px solid var(--neon-cyan); text-shadow: 0 0 6px currentColor; }
+.oauth-btn.phone:hover { background: rgba(5,217,232,0.1); box-shadow: 0 0 12px rgba(5,217,232,0.3); }
+.copyright { position: absolute; bottom: 16px; bottom: max(16px, env(safe-area-inset-bottom)); left: 0; right: 0; text-align: center; font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); letter-spacing: 0.08em; pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="bg-fx"></div>
+<div class="bg-grid"></div>
+<div class="bg-vignette"></div>
+<div class="bg-scanlines"></div>
+
+<div id="lockScreen" class="lock-screen">
+  <div class="lock-logo">
+    <svg viewBox="0 0 110 110" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ff2a6d"/><stop offset="100%" stop-color="#05d9e8"/></linearGradient></defs>
+      <polygon points="55,8 100,32 100,78 55,102 10,78 10,32" fill="none" stroke="url(#lg)" stroke-width="2"/>
+      <polygon points="55,24 86,40 86,70 55,86 24,70 24,40" fill="none" stroke="url(#lg)" stroke-width="1.5" opacity="0.7"/>
+      <text x="55" y="64" text-anchor="middle" fill="url(#lg)" font-family="Orbitron, sans-serif" font-weight="900" font-size="20" letter-spacing="2">SB</text>
+    </svg>
+  </div>
+  <h1 id="lockTitle">SECUREBUBBA</h1>
+  <p id="lockSubtitle" class="subtitle">Welcome</p>
+  <div id="welcomeChoices" style="width:100%;max-width:400px;">
+    <button type="button" id="biometricBtn" class="primary" style="display:none;width:100%;margin-bottom:10px;font-size:15px;padding:16px;background:rgba(57,255,20,0.12);border-color:var(--neon-green);color:var(--neon-green);">👆 Sign in with Face ID / Touch ID</button>
+    <button type="button" id="signInChoiceBtn" class="primary" style="width:100%;margin-bottom:10px;font-size:15px;padding:16px;">Sign in with email</button>
+    <button type="button" id="createChoiceBtn" class="primary" style="width:100%;margin-bottom:10px;font-size:15px;padding:16px;">Create new account</button>
+    <div class="oauth-divider">or continue with</div>
+    <div class="oauth-buttons">
+      <button type="button" class="oauth-btn google" data-provider="google">
+        <span class="oauth-logo"><svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg></span>
+        <span class="oauth-label">Continue with Google</span>
+      </button>
+    </div>
+    <button type="button" id="welcomeImportBtn" class="ghost" style="width:100%;margin-top:14px;">Load backup file</button>
+  </div>
+  <div id="phonePanel" style="display:none;width:100%;max-width:400px;">
+    <input type="tel" id="phoneInput" placeholder="+1 555 123 4567" autocomplete="tel" style="margin-bottom:12px;">
+    <button type="button" id="sendCodeBtn" class="primary" style="width:100%;">Send Code</button>
+    <input type="text" id="phoneCodeInput" placeholder="6-digit code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" style="display:none;margin-top:12px;margin-bottom:12px;">
+    <button type="button" id="verifyCodeBtn" class="primary" style="display:none;width:100%;">Verify Code</button>
+    <button type="button" id="phoneBackBtn" class="ghost" style="width:100%;margin-top:8px;">← Back</button>
+    <div id="recaptchaContainer" style="margin-top:8px;"></div>
+  </div>
+  <form id="lockForm" style="display:none;width:100%;max-width:400px;">
+    <input type="email" id="accountEmail" placeholder="Email" autocomplete="email" style="display:none;margin-bottom:10px;">
+    <input type="password" id="masterPw" placeholder="Master password" autocomplete="current-password" required>
+    <input type="password" id="masterPw2" placeholder="Confirm password" style="display:none;" autocomplete="new-password">
+    <button type="submit" id="lockBtn" class="primary" style="width:100%;">Unlock</button>
+    <button type="button" id="backToWelcomeBtn" class="ghost" style="width:100%;margin-top:8px;">&#x2190; Back</button>
+    <button type="button" id="importVaultBtn" class="ghost" style="width:100%;margin-top:2px;display:none;">Load backup file</button>
+    <button type="button" id="resetVaultBtn" class="ghost" style="width:100%;margin-top:2px;color:var(--danger);display:none;">Forgot password? Start over</button>
+  </form>
+  <input type="file" id="vaultFileInput" accept=".vault,.json" style="display:none;">
+  <div class="copyright">SecureBubba Copyright 2026</div>
+</div>
+
+<div id="app" class="app">
+  <div class="header">
+    <div class="header-brand">
+      <span class="header-avatar" id="headerAvatar"></span>
+      <span class="name">SECUREBUBBA</span>
+      <span class="ver" id="headerVersion">v1.0</span>
+    </div>
+    <button class="icon-btn" id="exportBtn" title="Save backup">&#x2913;</button>
+    <button class="icon-btn" id="settingsBtn" title="Settings">&#x2699;</button>
+    <button class="icon-btn" id="lockBtn2" title="Lock">&#x23FB;</button>
+  </div>
+  <div class="search-bar"><input type="search" id="searchInput" placeholder="Search..."></div>
+  <div class="tabs">
+    <button class="tab active" data-filter="all">All</button>
+    <button class="tab" data-filter="login">Logins</button>
+    <button class="tab" data-filter="card">Cards</button>
+    <button class="tab" data-filter="identity">IDs</button>
+    <button class="tab" data-filter="note">Notes</button>
+  </div>
+  <div class="list" id="itemList"></div>
+  <button class="fab" id="addBtn" aria-label="Add item">+</button>
+</div>
+
+<div id="itemModal" class="modal-bg">
+  <div class="modal">
+    <div class="modal-header">
+      <button class="icon-btn" id="closeItemBtn">&#x2715;</button>
+      <h2 id="itemModalTitle">New Item</h2>
+      <button id="saveItemBtn" class="primary" style="padding:8px 14px;min-height:36px;font-size:11px;">Save</button>
+    </div>
+    <div class="modal-body" id="itemModalBody"></div>
+    <div class="modal-footer" id="itemFooter" style="display:none;"><button class="danger" id="deleteItemBtn">Delete</button></div>
+  </div>
+</div>
+
+<div id="settingsModal" class="modal-bg">
+  <div class="modal">
+    <div class="modal-header">
+      <button class="icon-btn" id="closeSettingsBtn">&#x2715;</button>
+      <h2>Settings</h2>
+      <span style="width:40px;"></span>
+    </div>
+    <div class="modal-body">
+      <h3>Profile</h3>
+      <div class="field"><label>Display Name</label><input type="text" id="settingsDisplayName" placeholder="What should we call you?" maxlength="40" autocomplete="off"></div>
+      <div class="field"><label>Avatar</label><div id="avatarGrid" class="avatar-grid"></div></div>
+
+      <hr>
+      <h3>Account</h3>
+      <div class="field"><label>Email</label><input type="email" id="settingsEmail" placeholder="your@email.com" autocomplete="email"></div>
+      <div class="info-row"><span class="info-label">Email verified</span><span class="info-value" id="infoEmailVerified">—</span></div>
+      <button class="secondary" id="sendVerifyEmailBtn" style="width:100%;margin-top:6px;margin-bottom:14px;">Send verification email</button>
+      <div class="field"><label>Change email</label>
+        <div class="field-row">
+          <input type="email" id="newEmailInput" placeholder="new@email.com" autocomplete="off">
+          <button class="secondary" id="changeEmailBtn" type="button">Change</button>
+        </div>
+      </div>
+      <button class="secondary" id="resetPasswordBtn" style="width:100%;margin-bottom:14px;">Send password reset email</button>
+      <p class="term-text" style="margin-top:-8px;margin-bottom:14px;font-size:11px;">⚠ Reset only changes the Firebase login password. It does NOT recover your vault — the master password is the encryption key and cannot be reset.</p>
+      <div class="info-row"><span class="info-label">Account created</span><span class="info-value" id="infoCreatedAt">—</span></div>
+      <div class="info-row"><span class="info-label">Saved items</span><span class="info-value" id="infoItemCount">—</span></div>
+      <div class="info-row"><span class="info-label">This device</span><span class="info-value" id="infoDevice">—</span></div>
+      <div class="info-row"><span class="info-label">Storage used</span><span class="info-value" id="infoStorage">—</span></div>
+
+      <hr>
+      <h3>Security</h3>
+      <div class="field"><label>Auto-lock after (minutes)</label><input type="number" id="autoLockMins" min="1" max="60" value="5"></div>
+      <div class="field"><label>Change master password (optional)</label><input type="password" id="newMasterPw" placeholder="Leave blank to keep current" autocomplete="new-password">
+        <div class="password-strength"><div class="password-strength-bar" id="newPwStrength"></div></div>
+        <div class="helper-row"><span id="newPwStrengthLabel" style="color:var(--text-dim);"></span></div>
+      </div>
+      <div class="toggle-row"><label>Sound effects</label><div class="toggle on" id="soundToggle" data-on="true"></div></div>
+      <div class="toggle-row"><label>Biometric unlock (Face ID / Touch ID)</label><div class="toggle" id="biometricToggle" data-on="false"></div></div>
+      <div class="info-row" style="margin-top:8px;"><span class="info-label">Two-factor authentication</span><span class="info-value" id="info2FAStatus">—</span></div>
+      <button class="secondary" id="setup2FABtn" style="width:100%;margin-top:8px;">Set up 2FA</button>
+      <button class="danger" id="disable2FABtn" style="width:100%;margin-top:8px;display:none;">Disable 2FA</button>
+
+      <hr>
+      <h3>Privacy</h3>
+      <div class="toggle-row"><label>Check passwords against breach database</label><div class="toggle on" id="breachToggle" data-on="true"></div></div>
+      <p class="term-text" style="margin-top:6px;">When on, password breach checks send only the first 5 chars of an SHA-1 hash to haveibeenpwned.com. Your actual password never leaves the device.</p>
+
+      <button id="saveSettingsBtn" class="primary" style="width:100%;margin-top:18px;">Save Settings</button>
+      <hr>
+      <h3>Cloud Sync</h3>
+      <div class="toggle-row"><label>Auto-sync vault to cloud</label><div class="toggle on" id="cloudToggle" data-on="true"></div></div>
+      <p class="term-text" id="cloudStatus" style="margin-top:6px;">—</p>
+      <button class="secondary" id="syncNowBtn" style="width:100%;margin-top:10px;">↻ Sync Now</button>
+      <hr>
+      <h3>Backup &amp; Restore</h3>
+      <p class="term-text" style="margin-bottom:14px;">Save an encrypted backup file you can store anywhere. Only your master password can open it.</p>
+      <div class="row-buttons">
+        <button class="secondary" id="downloadVaultBtn">&#x2B07; Save Backup</button>
+        <button class="secondary" id="importBtnSettings">&#x2B06; Load Backup</button>
+      </div>
+      <hr>
+      <h3>Danger Zone</h3>
+      <button class="danger" id="wipeBtn" style="width:100%;">Delete Vault from this device</button>
+      <p class="term-text" style="margin-top:10px;">Make sure you've saved a backup first. There's no recovery.</p>
+      <hr>
+      <p style="text-align:center;font-family:var(--font-mono);font-size:11px;color:var(--text-dim);letter-spacing:0.08em;">SecureBubba Copyright 2026</p>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast">
+  <div class="toast-label" id="toastLabel">Notice</div>
+  <div class="toast-msg" id="toastMsg"></div>
+</div>
+
+<script>
+// Built-in Firebase config — sync works out of the box, no manual setup.
+const BUILTIN_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCQ9BGCiHh9qnQQPln54fLaDwVRE5J4vWE",
+  authDomain: "bubba-abde9.firebaseapp.com",
+  projectId: "bubba-abde9",
+  storageBucket: "bubba-abde9.firebasestorage.app",
+  messagingSenderId: "458533371931",
+  appId: "1:458533371931:web:a0ee9a84adf73f9750f8be",
+  measurementId: "G-FN0RQX6M5E"
+};
+
+const KDF_ITERATIONS = 250000;
+async function deriveKey(password, salt) {
+  const baseKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name:'PBKDF2', salt, iterations:KDF_ITERATIONS, hash:'SHA-256' }, baseKey, { name:'AES-GCM', length:256 }, false, ['encrypt','decrypt']);
+}
+async function encryptVault(vaultObj, password) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveKey(password, salt);
+  const ct = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, new TextEncoder().encode(JSON.stringify(vaultObj)));
+  return { v:1, alg:'AES-GCM-256/PBKDF2-SHA256', salt:b64e(salt), iv:b64e(iv), iter:KDF_ITERATIONS, ct:b64e(new Uint8Array(ct)) };
+}
+async function decryptVault(blob, password) {
+  const salt = b64d(blob.salt), iv = b64d(blob.iv), ct = b64d(blob.ct);
+  const key = await deriveKey(password, salt);
+  const pt = await crypto.subtle.decrypt({ name:'AES-GCM', iv }, key, ct);
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+function b64e(bytes){let s='';for(let i=0;i<bytes.length;i++)s+=String.fromCharCode(bytes[i]);return btoa(s);}
+function b64d(str){const s=atob(str);const a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a;}
+
+function base32Decode(s) {
+  const A='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  s=s.replace(/=+$/,'').toUpperCase().replace(/\s/g,'');
+  let bits='';
+  for (const c of s){const v=A.indexOf(c);if(v<0)throw new Error('bad');bits+=v.toString(2).padStart(5,'0');}
+  const bytes=new Uint8Array(Math.floor(bits.length/8));
+  for(let i=0;i<bytes.length;i++)bytes[i]=parseInt(bits.substr(i*8,8),2);
+  return bytes;
+}
+async function totp(secret, period=30, digits=6) {
+  if(!secret) return null;
+  try {
+    const key=base32Decode(secret);
+    const counter=Math.floor(Date.now()/1000/period);
+    const buf=new ArrayBuffer(8); const view=new DataView(buf); view.setUint32(4,counter,false);
+    const ck=await crypto.subtle.importKey('raw',key,{name:'HMAC',hash:'SHA-1'},false,['sign']);
+    const sig=new Uint8Array(await crypto.subtle.sign('HMAC',ck,buf));
+    const off=sig[sig.length-1]&0x0f;
+    const code=((sig[off]&0x7f)<<24)|((sig[off+1]&0xff)<<16)|((sig[off+2]&0xff)<<8)|(sig[off+3]&0xff);
+    return { code:(code%Math.pow(10,digits)).toString().padStart(digits,'0'), secondsLeft: period-(Math.floor(Date.now()/1000)%period), period };
+  } catch(e){ return null; }
+}
+
+function generatePassword(opts={}) {
+  const length=opts.length||20;
+  const lower='abcdefghijklmnopqrstuvwxyz', upper='ABCDEFGHIJKLMNOPQRSTUVWXYZ', digits='0123456789', symbols='!@#$%^&*()-_=+[]{};:,.?';
+  let cs='';
+  if(opts.lower!==false)cs+=lower; if(opts.upper!==false)cs+=upper; if(opts.digits!==false)cs+=digits; if(opts.symbols!==false)cs+=symbols;
+  if(!cs)cs=lower+upper+digits;
+  const arr=new Uint32Array(length); crypto.getRandomValues(arr);
+  let pw=''; for(let i=0;i<length;i++)pw+=cs[arr[i]%cs.length];
+  return pw;
+}
+function passwordStrength(pw) {
+  if(!pw) return { score:0, label:'', color:'' };
+  let pool=0;
+  if(/[a-z]/.test(pw))pool+=26; if(/[A-Z]/.test(pw))pool+=26; if(/[0-9]/.test(pw))pool+=10; if(/[^a-zA-Z0-9]/.test(pw))pool+=32;
+  const e=pw.length*Math.log2(Math.max(pool,1));
+  let s,l,c;
+  if(e<28){s=1;l='Weak';c='var(--danger)';}
+  else if(e<50){s=2;l='Fair';c='var(--warning)';}
+  else if(e<80){s=3;l='Strong';c='var(--success)';}
+  else{s=4;l='Excellent';c='var(--neon-cyan)';}
+  return { score:s, label:l, color:c, entropy:Math.round(e) };
+}
+async function sha1Hex(str) {
+  const buf=await crypto.subtle.digest('SHA-1',new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('').toUpperCase();
+}
+async function checkBreach(pw) {
+  if(!pw) return null;
+  try {
+    const h=await sha1Hex(pw); const p=h.substring(0,5); const sf=h.substring(5);
+    const r=await fetch(`https://api.pwnedpasswords.com/range/${p}`);
+    if(!r.ok) return null;
+    const t=await r.text();
+    for (const line of t.split('\n')) { const [s,c]=line.trim().split(':'); if(s===sf) return parseInt(c,10); }
+    return 0;
+  } catch(e){ return null; }
+}
+
+let audioCtx=null, soundEnabled=true;
+function ensureAudio(){ if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){return null;}} if(audioCtx.state==='suspended')audioCtx.resume().catch(()=>{}); return audioCtx; }
+function playTone(freq,dur,type='sine',vol=0.08,when=0){
+  if(!soundEnabled) return; const ctx=ensureAudio(); if(!ctx) return;
+  try { const t0=ctx.currentTime+when; const o=ctx.createOscillator(), g=ctx.createGain();
+    o.type=type; o.frequency.setValueAtTime(freq,t0);
+    g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(vol,t0+0.005); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    o.connect(g).connect(ctx.destination); o.start(t0); o.stop(t0+dur+0.02);
+  } catch(e){}
+}
+function sweep(f1,f2,dur,type='sawtooth',vol=0.06){
+  if(!soundEnabled) return; const ctx=ensureAudio(); if(!ctx) return;
+  try { const t0=ctx.currentTime; const o=ctx.createOscillator(), g=ctx.createGain();
+    o.type=type; o.frequency.setValueAtTime(f1,t0); o.frequency.exponentialRampToValueAtTime(f2,t0+dur);
+    g.gain.setValueAtTime(0,t0); g.gain.linearRampToValueAtTime(vol,t0+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    o.connect(g).connect(ctx.destination); o.start(t0); o.stop(t0+dur+0.02);
+  } catch(e){}
+}
+function sfx(name) {
+  switch(name){
+    case 'click': playTone(900,0.04,'square',0.025); break;
+    case 'tap': playTone(1200,0.025,'square',0.02); break;
+    case 'unlock': sweep(220,880,0.35,'sawtooth',0.05); playTone(880,0.18,'sine',0.05,0.3); break;
+    case 'lock': sweep(880,180,0.35,'sawtooth',0.05); break;
+    case 'save': playTone(659,0.06,'square',0.05); playTone(988,0.12,'square',0.05,0.06); break;
+    case 'achievement': playTone(523,0.08,'triangle',0.05); playTone(659,0.08,'triangle',0.05,0.08); playTone(784,0.08,'triangle',0.05,0.16); playTone(1047,0.2,'triangle',0.06,0.24); break;
+    case 'copy': playTone(1200,0.04,'sine',0.04); playTone(1600,0.06,'sine',0.04,0.04); break;
+    case 'error': sweep(440,110,0.3,'sawtooth',0.06); break;
+    case 'warning': playTone(440,0.08,'square',0.05); playTone(440,0.08,'square',0.05,0.12); break;
+    case 'delete': sweep(660,110,0.4,'sawtooth',0.07); break;
+  }
+}
+
+let masterPassword=null;
+let vault={ version:1, items:[], settings:{ autoLockMinutes:5, sound:true } };
+let currentFilter='all', currentSearch='', currentItemId=null, autoLockTimer=null, clipboardClearTimer=null;
+const STORAGE_KEY='securebubba_blob_v1';
+
+function uuid() { return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c/4).toString(16)); }
+const DISPLAY_NAME_KEY = 'sb_display_name_v1';
+async function saveVault() {
+  const blob=await encryptVault(vault, masterPassword);
+  blob.savedAt = Date.now();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(blob));
+  // Mirror the display name in plaintext so the welcome screen can greet by name before unlock
+  if(vault.settings?.displayName) localStorage.setItem(DISPLAY_NAME_KEY, vault.settings.displayName);
+  else localStorage.removeItem(DISPLAY_NAME_KEY);
+  resetAutoLock();
+  if(cloudReady && cloudUser) cloudPush(blob).then(()=>updateCloudStatus()).catch(e=>console.warn('Cloud push failed:',e));
+}
+function loadVaultBlob() { const raw=localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; }
+
+const $ = id => document.getElementById(id);
+const TOAST_KIND = { system:{label:'Notice',cls:''}, achievement:{label:'Saved',cls:'t-achievement'}, intel:{label:'Copied',cls:'t-intel'}, warning:{label:'Warning',cls:'t-warning'}, error:{label:'Error',cls:'t-error'} };
+function toast(msg, kind='system', sound=null) {
+  const t=$('toast'); const k=TOAST_KIND[kind]||TOAST_KIND.system;
+  $('toastLabel').textContent = k.label; $('toastMsg').textContent=msg;
+  t.className='toast '+k.cls+' show';
+  clearTimeout(t._timer); t._timer=setTimeout(()=>{ t.className='toast '+k.cls; }, 2200);
+  if(sound) sfx(sound);
+}
+async function copyToClipboard(text, label='Copied') {
+  try { await navigator.clipboard.writeText(text); toast(label,'intel','copy');
+    if(clipboardClearTimer) clearTimeout(clipboardClearTimer);
+    clipboardClearTimer=setTimeout(()=>{ navigator.clipboard.writeText('').catch(()=>{}); }, 30000);
+  } catch(e) { toast('Copy failed','error','error'); }
+}
+
+function showLockScreen() {
+  $('lockScreen').style.display='flex'; $('app').classList.remove('active');
+  showWelcome();
+}
+function showWelcome() {
+  const blob = loadVaultBlob();
+  const name = localStorage.getItem(DISPLAY_NAME_KEY);
+  $('lockTitle').textContent='SECUREBUBBA';
+  $('lockSubtitle').textContent = blob ? (name ? 'Welcome back, '+name : 'Welcome back') : 'Welcome';
+  $('welcomeChoices').style.display='block';
+  $('lockForm').style.display='none';
+  $('phonePanel').style.display='none';
+  $('biometricBtn').style.display = (isBiometricSupported() && isBiometricEnrolled() && blob) ? 'block' : 'none';
+}
+function showSignIn() {
+  const blob = loadVaultBlob();
+  if(!blob){ toast('No account on this device yet — tap Create new account first','warning','warning'); return; }
+  $('lockTitle').textContent='SIGN IN';
+  $('lockSubtitle').textContent = 'Enter your master password';
+  $('welcomeChoices').style.display='none';
+  $('lockForm').style.display='block';
+  $('masterPw').value=''; $('masterPw2').value=''; $('accountEmail').value='';
+  $('masterPw2').style.display='none';
+  $('accountEmail').style.display='none';
+  $('masterPw').placeholder='Master password';
+  $('lockBtn').textContent='Unlock';
+  $('resetVaultBtn').style.display='block';
+  $('importVaultBtn').style.display='none';
+  setTimeout(()=>$('masterPw').focus(), 100);
+}
+function showCreate() {
+  const blob = loadVaultBlob();
+  if(blob){ if(!confirm('You already have an account on this device. Creating a new one will delete the old account and any saved passwords. Continue?')) return; localStorage.removeItem(STORAGE_KEY); }
+  $('lockTitle').textContent='CREATE ACCOUNT';
+  $('lockSubtitle').textContent='Enter your email and pick a master password';
+  $('welcomeChoices').style.display='none';
+  $('lockForm').style.display='block';
+  $('masterPw').value=''; $('masterPw2').value=''; $('accountEmail').value='';
+  $('masterPw2').style.display='block';
+  $('accountEmail').style.display='block';
+  $('masterPw').placeholder='New master password';
+  $('lockBtn').textContent='Create Account';
+  $('resetVaultBtn').style.display='none';
+  $('importVaultBtn').style.display='none';
+  setTimeout(()=>$('accountEmail').focus(), 100);
+}
+function lock(silent) {
+  masterPassword=null; vault={version:1,items:[],settings:{autoLockMinutes:5,sound:true}};
+  if(autoLockTimer) clearTimeout(autoLockTimer);
+  $('itemModal').classList.remove('active'); $('settingsModal').classList.remove('active');
+  if(!silent) sfx('lock'); init();
+}
+function resetAutoLock() {
+  if(autoLockTimer) clearTimeout(autoLockTimer);
+  if(!masterPassword) return;
+  const m=vault.settings?.autoLockMinutes||5;
+  autoLockTimer=setTimeout(()=>{ lock(); toast('Locked due to inactivity','warning','warning'); }, m*60*1000);
+}
+['click','keydown','touchstart'].forEach(ev => document.addEventListener(ev, () => masterPassword && resetAutoLock(), {passive:true}));
+
+function showApp() {
+  $('lockScreen').style.display='none'; $('app').classList.add('active');
+  soundEnabled=vault.settings?.sound!==false;
+  updateHeaderProfile();
+  renderList(); resetAutoLock();
+}
+
+const AVATARS = ['🦊','🐱','🐺','🐼','🐉','🦄','👾','🤖','🐙','🦅','⚡','🔥','💎','🌙','🎮','🚀','🌟','🛸'];
+let pickedAvatar = null;
+
+function updateHeaderProfile() {
+  const av = $('headerAvatar');
+  const ver = $('headerVersion');
+  if(vault.settings?.avatar){ av.textContent = vault.settings.avatar; av.classList.add('shown'); }
+  else { av.textContent=''; av.classList.remove('shown'); }
+  if(vault.settings?.displayName){ ver.textContent = 'Hi, '+vault.settings.displayName; }
+  else { ver.textContent = 'v1.0'; }
+}
+
+function renderAvatarGrid() {
+  const grid = $('avatarGrid');
+  if(!grid) return;
+  grid.innerHTML = AVATARS.map(a => `<div class="avatar-option ${a===pickedAvatar?'selected':''}" data-emoji="${a}">${a}</div>`).join('');
+  grid.querySelectorAll('.avatar-option').forEach(el => {
+    el.addEventListener('click', () => {
+      sfx('click');
+      pickedAvatar = el.dataset.emoji;
+      grid.querySelectorAll('.avatar-option').forEach(x=>x.classList.remove('selected'));
+      el.classList.add('selected');
+    });
+  });
+}
+
+function detectDevice() {
+  const ua = navigator.userAgent;
+  if(/iPad/.test(ua)) return 'iPad';
+  if(/iPhone/.test(ua)) return 'iPhone';
+  if(/Android/.test(ua)) return 'Android';
+  if(/Mac/.test(ua)) return 'Mac';
+  if(/Windows/.test(ua)) return 'Windows PC';
+  if(/Linux/.test(ua)) return 'Linux PC';
+  return 'Unknown device';
+}
+
+function formatBytes(n) {
+  if(n<1024) return n+' bytes';
+  if(n<1024*1024) return (n/1024).toFixed(1)+' KB';
+  return (n/(1024*1024)).toFixed(2)+' MB';
+}
+
+function calcStorageUsed() {
+  let total = 0;
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i); const v=localStorage.getItem(k);
+    total += (k.length + (v?.length||0)) * 2; // rough byte count (UTF-16)
+  }
+  return total;
+}
+
+const TYPE_LABEL = { login:'PASS', card:'CARD', identity:'ID', note:'NOTE' };
+function iconForType(type) { return TYPE_LABEL[type]||'???'; }
+
+function renderList() {
+  const list=$('itemList');
+  let items=vault.items.slice();
+  if(currentFilter!=='all') items=items.filter(i=>i.type===currentFilter);
+  if(currentSearch) {
+    const q=currentSearch.toLowerCase();
+    items=items.filter(i =>
+      (i.title||'').toLowerCase().includes(q) ||
+      (i.username||'').toLowerCase().includes(q) ||
+      (i.url||'').toLowerCase().includes(q) ||
+      (i.notes||'').toLowerCase().includes(q) ||
+      ((i.tags||[]).join(' ').toLowerCase().includes(q))
+    );
+  }
+  items.sort((a,b)=>(a.title||'').localeCompare(b.title||''));
+  if(items.length===0) {
+    list.innerHTML = `<div class="empty"><div class="icon-big">${vault.items.length===0?'Empty':'No matches'}</div><div class="title">${vault.items.length===0?'Nothing saved yet':'No matches'}</div><div class="sub">${vault.items.length===0?'Tap + to add your first item':'Try a different search'}</div></div>`;
+    return;
+  }
+  list.innerHTML = items.map(item => {
+    const sub = item.username || item.url || (item.type==='card' && item.cardNumber ? '•••• '+item.cardNumber.slice(-4) : '') || (item.tags||[]).join(', ');
+    return `<div class="item" data-id="${item.id}"><div class="icon-wrap t-${item.type}">${iconForType(item.type)}</div><div class="info"><div class="title">${escapeHtml(item.title||'Untitled')}</div><div class="subtitle">${escapeHtml(sub)}</div></div><div class="chev">›</div></div>`;
+  }).join('');
+  list.querySelectorAll('.item').forEach(el => el.addEventListener('click', () => { sfx('tap'); openItem(el.dataset.id); }));
+}
+function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function openItem(id) {
+  const item = id ? vault.items.find(i=>i.id===id) : null;
+  currentItemId=id;
+  $('itemModalTitle').textContent = item ? (item.title||'Edit') : 'New Item';
+  $('itemFooter').style.display = item ? 'flex' : 'none';
+  renderItemEditor(item || { type:'login' });
+  $('itemModal').classList.add('active');
+}
+function closeItem() { $('itemModal').classList.remove('active'); currentItemId=null; }
+
+function renderItemEditor(item) {
+  const body = $('itemModalBody');
+  body.innerHTML = `
+    <div class="field"><label>Type</label><select id="f_type">
+      <option value="login" ${item.type==='login'?'selected':''}>Login</option>
+      <option value="card" ${item.type==='card'?'selected':''}>Credit card</option>
+      <option value="identity" ${item.type==='identity'?'selected':''}>ID / Passport</option>
+      <option value="note" ${item.type==='note'?'selected':''}>Secure note</option>
+    </select></div>
+    <div class="field"><label>Title</label><input id="f_title" value="${escapeHtml(item.title)}" placeholder="e.g. Roblox, Gmail, Chase Visa"></div>
+    <div id="typeFields"></div>
+    <div class="field"><label>Notes</label><textarea id="f_notes" rows="4" placeholder="Anything else worth remembering">${escapeHtml(item.notes)}</textarea></div>
+    <div class="field"><label>Tags</label><input id="f_tags" value="${escapeHtml((item.tags||[]).join(', '))}" placeholder="work, banking, school (comma-separated)"></div>`;
+
+  const renderTypeFields = (type) => {
+    const tf = $('typeFields');
+    if(type==='login') {
+      tf.innerHTML = `
+        <div class="field"><label>Username / Email</label><div class="field-row"><input id="f_username" value="${escapeHtml(item.username)}" autocomplete="off"><button class="secondary" id="copyUserBtn" type="button">Copy</button></div></div>
+        <div class="field"><label>Password</label>
+          <div class="field-row"><input id="f_password" type="password" value="${escapeHtml(item.password)}" autocomplete="off"><button class="secondary" id="togglePwBtn" type="button" title="Show/hide">\u{1F441}</button><button class="secondary" id="copyPwBtn" type="button">Copy</button></div>
+          <div class="field-row" style="margin-top:8px;"><button class="secondary" id="genPwBtn" type="button" style="flex:1;">⚡ Generate strong password</button></div>
+          <div class="password-strength"><div class="password-strength-bar" id="pwStrength"></div></div>
+          <div class="helper-row"><span id="pwStrengthLabel" style="color:var(--text-dim);"></span><span id="pwBreachLabel"></span></div>
+        </div>
+        <div class="field"><label>Website</label><input id="f_url" type="url" value="${escapeHtml(item.url)}" placeholder="https://" autocomplete="off"></div>
+        <div class="field"><label>2FA Secret (optional)</label><input id="f_totp" value="${escapeHtml(item.totpSecret)}" placeholder="Paste 2FA setup code from QR" autocomplete="off"><div id="totpPreview"></div></div>`;
+      const pwInput = $('f_password');
+      const updateStrength = () => {
+        const s = passwordStrength(pwInput.value);
+        const bar = $('pwStrength'); bar.style.width = (s.score*25)+'%'; bar.style.background = s.color;
+        $('pwStrengthLabel').innerHTML = s.label ? `<span style="color:${s.color};text-shadow:0 0 6px ${s.color};">${s.label}</span> <span style="color:var(--text-dim);">~${s.entropy} bits</span>` : '';
+      };
+      pwInput.addEventListener('input', updateStrength); updateStrength();
+      $('togglePwBtn').onclick = () => { sfx('click'); pwInput.type = pwInput.type==='password' ? 'text' : 'password'; };
+      $('genPwBtn').onclick = () => { sfx('copy'); pwInput.type='text'; pwInput.value=generatePassword({length:20}); updateStrength(); $('pwBreachLabel').textContent=''; };
+      $('copyUserBtn').onclick = () => copyToClipboard($('f_username').value, 'Username copied');
+      $('copyPwBtn').onclick = () => copyToClipboard(pwInput.value, 'Password copied (clears in 30s)');
+      pwInput.addEventListener('blur', async () => {
+        if(!pwInput.value){ $('pwBreachLabel').textContent=''; return; }
+        if(vault.settings?.breachCheck===false){ $('pwBreachLabel').textContent=''; return; }
+        $('pwBreachLabel').innerHTML='<span style="color:var(--text-dim);">Checking...</span>';
+        const count = await checkBreach(pwInput.value);
+        if(count===null) $('pwBreachLabel').innerHTML='<span style="color:var(--text-dim);">Check unavailable</span>';
+        else if(count===0) $('pwBreachLabel').innerHTML='<span style="color:var(--success);text-shadow:0 0 6px currentColor;">✓ Not in any known breach</span>';
+        else $('pwBreachLabel').innerHTML=`<span style="color:var(--danger);text-shadow:0 0 6px currentColor;">⚠ Found in ${count.toLocaleString()} breaches — change it</span>`;
+      });
+      const totpInput = $('f_totp');
+      const updateTotp = async () => {
+        const v = totpInput.value.trim(); const preview=$('totpPreview');
+        if(!v){ preview.innerHTML=''; return; }
+        const t = await totp(v);
+        if(!t){ preview.innerHTML='<div style="color:var(--danger);font-size:13px;margin-top:8px;font-family:var(--font-mono);">Invalid 2FA code</div>'; return; }
+        const pct = ((t.period - t.secondsLeft)/t.period)*360;
+        preview.innerHTML = `<div class="totp-display" id="totpCopyTarget"><div class="totp-code">${t.code.replace(/(\d{3})(\d{3})/, '$1 $2')}</div><div class="totp-timer" style="background: conic-gradient(var(--neon-pink) ${pct}deg, var(--surface-3) ${pct}deg);"><span>${t.secondsLeft}</span></div></div>`;
+        const target = document.getElementById('totpCopyTarget'); if(target) target.onclick = () => copyToClipboard(t.code, '2FA code copied');
+      };
+      totpInput.addEventListener('input', updateTotp); updateTotp();
+    } else if(type==='card') {
+      tf.innerHTML = `
+        <div class="field"><label>Cardholder Name</label><input id="f_cardName" value="${escapeHtml(item.cardName)}" autocomplete="off"></div>
+        <div class="field"><label>Card Number</label><div class="field-row"><input id="f_cardNumber" value="${escapeHtml(item.cardNumber)}" inputmode="numeric" autocomplete="off"><button class="secondary" id="copyCardBtn" type="button">Copy</button></div></div>
+        <div style="display:flex;gap:8px;">
+          <div class="field" style="flex:1;"><label>Expiry</label><input id="f_cardExpiry" value="${escapeHtml(item.cardExpiry)}" placeholder="MM/YY" autocomplete="off"></div>
+          <div class="field" style="flex:1;"><label>CVV</label><input id="f_cardCvv" type="password" value="${escapeHtml(item.cardCvv)}" inputmode="numeric" autocomplete="off"></div>
+        </div>
+        <div class="field"><label>PIN (optional)</label><input id="f_cardPin" type="password" value="${escapeHtml(item.cardPin)}" inputmode="numeric" autocomplete="off"></div>`;
+      const cb = $('copyCardBtn'); if(cb) cb.onclick = () => copyToClipboard($('f_cardNumber').value.replace(/\s/g,''), 'Card number copied');
+    } else if(type==='identity') {
+      tf.innerHTML = `
+        <div class="field"><label>Full Name</label><input id="f_idName" value="${escapeHtml(item.idName)}" autocomplete="off"></div>
+        <div class="field"><label>ID / Passport / SSN</label><div class="field-row"><input id="f_idNumber" type="password" value="${escapeHtml(item.idNumber)}" autocomplete="off"><button class="secondary" id="copyIdBtn" type="button">Copy</button></div></div>
+        <div class="field"><label>Date of Birth</label><input id="f_idDob" type="date" value="${escapeHtml(item.idDob)}" autocomplete="off"></div>
+        <div class="field"><label>Issued By</label><input id="f_idIssued" value="${escapeHtml(item.idIssued)}" placeholder="e.g. State of California" autocomplete="off"></div>
+        <div class="field"><label>Expiry</label><input id="f_idExpiry" type="date" value="${escapeHtml(item.idExpiry)}" autocomplete="off"></div>`;
+      const ib = $('copyIdBtn'); if(ib) ib.onclick = () => copyToClipboard($('f_idNumber').value, 'ID copied');
+    }
+  };
+  renderTypeFields(item.type);
+  $('f_type').addEventListener('change', e => { sfx('click'); item.type=e.target.value; renderTypeFields(e.target.value); });
+}
+
+async function saveItem() {
+  const type=$('f_type').value, title=$('f_title').value.trim();
+  if(!title){ toast('Title required','warning','warning'); return; }
+  const tags=$('f_tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  const notes=$('f_notes').value;
+  const now=Date.now();
+  let item = currentItemId ? vault.items.find(i=>i.id===currentItemId) : null;
+  const isNew = !item;
+  if(!item){ item={id:uuid(), createdAt:now}; vault.items.push(item); }
+  for(const k of Object.keys(item)) if(!['id','createdAt'].includes(k)) delete item[k];
+  Object.assign(item, { type, title, notes, tags, updatedAt:now });
+  if(type==='login') { item.username=$('f_username')?.value||''; item.password=$('f_password')?.value||''; item.url=$('f_url')?.value||''; item.totpSecret=$('f_totp')?.value.trim()||''; }
+  else if(type==='card') { item.cardName=$('f_cardName')?.value||''; item.cardNumber=$('f_cardNumber')?.value||''; item.cardExpiry=$('f_cardExpiry')?.value||''; item.cardCvv=$('f_cardCvv')?.value||''; item.cardPin=$('f_cardPin')?.value||''; }
+  else if(type==='identity') { item.idName=$('f_idName')?.value||''; item.idNumber=$('f_idNumber')?.value||''; item.idDob=$('f_idDob')?.value||''; item.idIssued=$('f_idIssued')?.value||''; item.idExpiry=$('f_idExpiry')?.value||''; }
+  await saveVault(); closeItem(); renderList();
+  toast(isNew ? 'Item saved' : 'Item updated', 'achievement', 'achievement');
+}
+async function deleteItem() {
+  if(!currentItemId) return;
+  if(!confirm('Delete this item? This cannot be undone.')) return;
+  vault.items = vault.items.filter(i=>i.id!==currentItemId);
+  await saveVault(); closeItem(); renderList();
+  toast('Item deleted','achievement','delete');
+}
+
+function downloadVault() {
+  const blob=loadVaultBlob();
+  if(!blob){ toast('Nothing to back up yet','warning','warning'); return; }
+  const data=new Blob([JSON.stringify(blob,null,2)], {type:'application/json'});
+  const url=URL.createObjectURL(data); const a=document.createElement('a');
+  a.href=url; const date=new Date().toISOString().split('T')[0]; a.download=`securebubba-${date}.vault`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  toast('Backup file saved','achievement','achievement');
+}
+function importVault() {
+  const inp=$('vaultFileInput'); inp.value='';
+  inp.onchange = async (e) => {
+    const file=e.target.files[0]; if(!file) return;
+    try {
+      const text=await file.text(); const blob=JSON.parse(text);
+      if(!blob.salt||!blob.iv||!blob.ct) throw new Error('Not a valid backup file');
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(blob));
+      toast('Backup loaded — please unlock','system','copy');
+      $('settingsModal').classList.remove('active'); lock(true);
+    } catch(err) { alert('Could not import: '+err.message); toast('Import failed','error','error'); }
+  };
+  inp.click();
+}
+
+// ==================== ACCOUNT MANAGEMENT (verify email, password reset, change email, 2FA) ====================
+async function sendVerificationEmail() {
+  const user = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
+  if(!user) { toast('Not signed in to cloud yet','warning','warning'); return; }
+  try {
+    await user.sendEmailVerification();
+    toast('Verification email sent — check your inbox','achievement','achievement');
+  } catch(e) {
+    toast('Could not send: '+(e.message||'unknown'),'error','error');
+  }
+}
+
+async function sendPasswordResetForCurrentEmail() {
+  const email = vault?.settings?.email;
+  if(!email) { toast('No email on file','warning','warning'); return; }
+  if(!confirm('Send a Firebase password reset email to '+email+'?\n\n⚠ IMPORTANT: This resets the Firebase login password, NOT the master password.\n\nYour vault is encrypted with the master password and CANNOT be recovered if forgotten. This reset will NOT recover the vault.\n\nContinue?')) return;
+  try {
+    await ensureFirebaseLoaded();
+    if(!firebase.apps.length) firebase.initializeApp(BUILTIN_FIREBASE_CONFIG);
+    await firebase.auth().sendPasswordResetEmail(email);
+    toast('Reset email sent','achievement','achievement');
+  } catch(e) {
+    toast('Could not send: '+(e.message||'unknown'),'error','error');
+  }
+}
+
+async function changeAccountEmail(newEmail) {
+  const user = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
+  if(!user) throw new Error('Not signed in to cloud yet');
+  if(!newEmail || !newEmail.includes('@')) throw new Error('Invalid email');
+  try {
+    // Try direct update (works for recently authed users)
+    if(typeof user.verifyBeforeUpdateEmail === 'function') {
+      await user.verifyBeforeUpdateEmail(newEmail);
+    } else {
+      await user.updateEmail(newEmail);
+    }
+    vault.settings.email = newEmail;
+    await saveVault();
+    return true;
+  } catch(e) {
+    if(e.code === 'auth/requires-recent-login') {
+      throw new Error('Sign out and back in, then try again (security check)');
+    }
+    throw e;
+  }
+}
+
+async function start2FAEnrollment(phoneNumber) {
+  const user = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
+  if(!user) throw new Error('Not signed in to cloud yet');
+  if(!phoneNumber || !phoneNumber.startsWith('+')) throw new Error('Use international format like +1 555 123 4567');
+  const session = await user.multiFactor.getSession();
+  if(!recaptchaVerifier) {
+    recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptchaContainer', { size: 'invisible' });
+  }
+  const phoneAuthProvider = new firebase.auth.PhoneAuthProvider();
+  const verificationId = await phoneAuthProvider.verifyPhoneNumber({ phoneNumber, session }, recaptchaVerifier);
+  return verificationId;
+}
+
+async function complete2FAEnrollment(verificationId, code) {
+  const user = firebase.auth().currentUser;
+  const cred = firebase.auth.PhoneAuthProvider.credential(verificationId, code);
+  const assertion = firebase.auth.PhoneMultiFactorGenerator.assertion(cred);
+  await user.multiFactor.enroll(assertion, 'My phone');
+}
+
+async function disable2FA() {
+  const user = firebase.auth().currentUser;
+  if(!user || !user.multiFactor) return;
+  const factors = user.multiFactor.enrolledFactors || [];
+  for(const factor of factors) {
+    await user.multiFactor.unenroll(factor);
+  }
+}
+
+function update2FAStatus() {
+  const user = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
+  const enrolled = !!(user && user.multiFactor && (user.multiFactor.enrolledFactors||[]).length > 0);
+  $('info2FAStatus').textContent = enrolled ? '✓ Enabled' : 'Not set up';
+  $('setup2FABtn').style.display = enrolled ? 'none' : 'block';
+  $('disable2FABtn').style.display = enrolled ? 'block' : 'none';
+}
+
+function updateEmailVerifiedStatus() {
+  const user = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
+  if(!user) {
+    $('infoEmailVerified').textContent = 'Not signed in to cloud';
+    $('sendVerifyEmailBtn').style.display = 'none';
+    return;
+  }
+  if(user.emailVerified) {
+    $('infoEmailVerified').textContent = '✓ Verified';
+    $('infoEmailVerified').style.color = 'var(--success)';
+    $('sendVerifyEmailBtn').style.display = 'none';
+  } else {
+    $('infoEmailVerified').textContent = 'Not verified';
+    $('infoEmailVerified').style.color = 'var(--warning)';
+    $('sendVerifyEmailBtn').style.display = 'block';
+  }
+}
+
+// ==================== BIOMETRIC (WebAuthn) ====================
+const BIOMETRIC_CRED_KEY='sb_biometric_cred_v1';
+const BIOMETRIC_PW_KEY='sb_biometric_pw_v1';
+
+function isBiometricSupported(){ return !!(window.PublicKeyCredential && navigator.credentials && navigator.credentials.create); }
+function isBiometricEnrolled(){ return !!localStorage.getItem(BIOMETRIC_CRED_KEY) && !!localStorage.getItem(BIOMETRIC_PW_KEY); }
+
+async function enableBiometric(masterPw){
+  if(!isBiometricSupported()) throw new Error('Biometric not supported on this device/browser');
+  if(location.protocol === 'file:') throw new Error('Biometric needs the app to be hosted (HTTPS)');
+  const challenge = crypto.getRandomValues(new Uint8Array(32));
+  const userId = new TextEncoder().encode(vault.settings?.email || 'securebubba');
+  const cred = await navigator.credentials.create({
+    publicKey: {
+      challenge,
+      rp: { name: 'SecureBubba', id: location.hostname },
+      user: { id: userId, name: vault.settings?.email || 'user', displayName: vault.settings?.displayName || 'SecureBubba User' },
+      pubKeyCredParams: [{ alg: -7, type: 'public-key' }, { alg: -257, type: 'public-key' }],
+      authenticatorSelection: { userVerification: 'required', residentKey: 'preferred' },
+      timeout: 60000, attestation: 'none'
+    }
+  });
+  if(!cred) throw new Error('Setup cancelled');
+  const key = await crypto.subtle.generateKey({ name:'AES-GCM', length:256 }, true, ['encrypt','decrypt']);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, new TextEncoder().encode(masterPw));
+  const keyExp = await crypto.subtle.exportKey('raw', key);
+  localStorage.setItem(BIOMETRIC_CRED_KEY, b64e(new Uint8Array(cred.rawId)));
+  localStorage.setItem(BIOMETRIC_PW_KEY, JSON.stringify({ iv: b64e(iv), ct: b64e(new Uint8Array(ct)), key: b64e(new Uint8Array(keyExp)) }));
+}
+
+async function biometricSignIn(){
+  const credId = localStorage.getItem(BIOMETRIC_CRED_KEY);
+  const stored = localStorage.getItem(BIOMETRIC_PW_KEY);
+  if(!credId || !stored) throw new Error('Biometric not set up');
+  const challenge = crypto.getRandomValues(new Uint8Array(32));
+  const cred = await navigator.credentials.get({
+    publicKey: {
+      challenge,
+      allowCredentials: [{ id: b64d(credId), type:'public-key' }],
+      userVerification: 'required', timeout: 60000
+    }
+  });
+  if(!cred) throw new Error('Biometric cancelled');
+  const data = JSON.parse(stored);
+  const key = await crypto.subtle.importKey('raw', b64d(data.key), 'AES-GCM', false, ['decrypt']);
+  const pwBuf = await crypto.subtle.decrypt({ name:'AES-GCM', iv: b64d(data.iv) }, key, b64d(data.ct));
+  return new TextDecoder().decode(pwBuf);
+}
+
+function disableBiometric(){
+  localStorage.removeItem(BIOMETRIC_CRED_KEY);
+  localStorage.removeItem(BIOMETRIC_PW_KEY);
+}
+
+async function tryBiometricUnlock(){
+  try {
+    const pw = await biometricSignIn();
+    const blob = loadVaultBlob();
+    if(!blob) { toast('No vault found','warning','warning'); return; }
+    vault = await decryptVault(blob, pw);
+    if(!vault.settings) vault.settings={autoLockMinutes:5,sound:true};
+    if(vault.settings.sound===undefined) vault.settings.sound=true;
+    masterPassword = pw;
+    sfx('unlock');
+    showApp();
+    if(loadCloudConfig()) {
+      initCloud().then(()=>cloudSyncOnUnlock(pw)).catch(e=>console.warn('Cloud init failed:',e));
+    }
+  } catch(e) {
+    toast('Biometric failed: '+(e.message||'unknown'),'error','error');
+  }
+}
+
+// ==================== PHONE AUTH ====================
+let phoneConfirmation = null;
+let recaptchaVerifier = null;
+
+async function startPhoneAuth(phoneNumber){
+  if(location.protocol === 'file:') throw new Error('Phone sign-in needs the app to be hosted');
+  await ensureFirebaseLoaded();
+  if(!firebase.apps.length) firebase.initializeApp(BUILTIN_FIREBASE_CONFIG);
+  if(!recaptchaVerifier) {
+    recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptchaContainer', { size: 'invisible' });
+  }
+  phoneConfirmation = await firebase.auth().signInWithPhoneNumber(phoneNumber, recaptchaVerifier);
+}
+
+async function confirmPhoneCode(code){
+  if(!phoneConfirmation) throw new Error('No active phone verification');
+  const result = await phoneConfirmation.confirm(code);
+  cloudUser = result.user;
+  cloudReady = true;
+  await handleOAuthSuccess(result.user);
+}
+
+function showPhonePanel(){
+  $('welcomeChoices').style.display='none';
+  $('lockForm').style.display='none';
+  $('phonePanel').style.display='block';
+  $('phoneInput').value=''; $('phoneInput').style.display='block';
+  $('phoneCodeInput').value=''; $('phoneCodeInput').style.display='none';
+  $('sendCodeBtn').style.display='block';
+  $('verifyCodeBtn').style.display='none';
+  $('lockTitle').textContent='PHONE SIGN-IN';
+  $('lockSubtitle').textContent='Enter your phone number with country code';
+  setTimeout(()=>$('phoneInput').focus(),100);
+}
+
+// ==================== OAUTH (Google / Microsoft / Facebook / Yahoo) ====================
+let pendingOAuthEmail = null; // email returned from OAuth provider, used during master-password setup
+
+function getOAuthProvider(name) {
+  switch(name) {
+    case 'google': return new firebase.auth.GoogleAuthProvider();
+    default: throw new Error('Unknown provider: '+name);
+  }
+}
+
+async function oauthSignIn(name) {
+  try {
+    sfx('click');
+    if(location.protocol === 'file:') {
+      toast('Social sign-in needs the app to be hosted on a website. See setup guide.', 'warning', 'warning');
+      return;
+    }
+    await ensureFirebaseLoaded();
+    if(!firebase.apps.length) firebase.initializeApp(BUILTIN_FIREBASE_CONFIG);
+    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    const provider = getOAuthProvider(name);
+
+    // Try popup first (much more reliable on desktop than redirect)
+    try {
+      const result = await firebase.auth().signInWithPopup(provider);
+      if(result && result.user) {
+        cloudUser = result.user;
+        cloudReady = true;
+        await handleOAuthSuccess(result.user);
+        return;
+      }
+    } catch(popupErr) {
+      // Popup blocked or unsupported — fall back to redirect (mobile / blocked popups)
+      if(['auth/popup-blocked','auth/popup-closed-by-user','auth/cancelled-popup-request','auth/operation-not-supported-in-this-environment'].includes(popupErr.code)) {
+        sessionStorage.setItem('sb_oauth_pending', '1');
+        await firebase.auth().signInWithRedirect(provider);
+        return;
+      }
+      throw popupErr;
+    }
+  } catch(e) {
+    console.error('OAuth start failed:', e);
+    toast('Sign-in failed: '+(e.message||'unknown'), 'error', 'error');
+  }
+}
+
+async function checkOAuthRedirect() {
+  if(location.protocol === 'file:') return false;
+  try {
+    await ensureFirebaseLoaded();
+    if(!firebase.apps.length) firebase.initializeApp(BUILTIN_FIREBASE_CONFIG);
+
+    // Attempt 1: getRedirectResult (works when Firebase Auth picks up the redirect synchronously)
+    try {
+      const result = await firebase.auth().getRedirectResult();
+      if(result && result.user) {
+        sessionStorage.removeItem('sb_oauth_pending');
+        cloudUser = result.user;
+        cloudReady = true;
+        await handleOAuthSuccess(result.user);
+        return true;
+      }
+    } catch(e) {
+      if(e.code !== 'auth/no-auth-event') {
+        console.error('getRedirectResult error:', e);
+        toast('Sign-in failed: '+(e.message||'unknown'), 'error', 'error');
+        return false;
+      }
+    }
+
+    // Attempt 2: maybe Firebase already restored the user from persistence
+    const currentUser = firebase.auth().currentUser;
+    if(currentUser && currentUser.email) {
+      cloudUser = currentUser; cloudReady = true;
+      await handleOAuthSuccess(currentUser);
+      return true;
+    }
+
+    // Attempt 3: wait briefly for onAuthStateChanged to fire (handles race conditions)
+    return await new Promise((resolve) => {
+      let resolved = false;
+      const unsub = firebase.auth().onAuthStateChanged(async user => {
+        if(resolved) return;
+        if(user && user.email) {
+          resolved = true; unsub();
+          cloudUser = user; cloudReady = true;
+          await handleOAuthSuccess(user);
+          resolve(true);
+        }
+      });
+      setTimeout(() => { if(!resolved){ resolved = true; unsub(); resolve(false); } }, 2500);
+    });
+  } catch(e) {
+    console.error('OAuth result error:', e);
+    toast('Sign-in failed: '+(e.message||'unknown'), 'error', 'error');
+    return false;
+  }
+}
+
+async function handleOAuthSuccess(user) {
+  pendingOAuthEmail = user.email;
+  toast('Signed in as '+user.email, 'system', 'copy');
+  // Pull cloud vault for this user
+  let cloudBlob = null;
+  try {
+    const cloud = await cloudPull();
+    if(cloud && cloud.blob) cloudBlob = cloud.blob;
+  } catch(e) { console.warn('Cloud pull after OAuth failed:', e); }
+  $('lockScreen').style.display='flex';
+  $('app').classList.remove('active');
+  if(cloudBlob) {
+    // Existing vault — replace local with cloud, ask for master password
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudBlob));
+    showSignIn();
+    $('lockSubtitle').textContent = 'Enter your master password for '+user.email;
+  } else {
+    // No cloud vault — create new one
+    localStorage.removeItem(STORAGE_KEY);
+    showCreate();
+    $('accountEmail').value = user.email;
+    $('accountEmail').readOnly = true;
+    $('accountEmail').style.opacity = '0.6';
+    $('lockSubtitle').textContent = 'Create your master password for '+user.email;
+  }
+}
+
+async function init() {
+  // Check if returning from OAuth redirect first
+  const handledOAuth = await checkOAuthRedirect();
+  if(handledOAuth) return;
+  const blob=loadVaultBlob(); showLockScreen(!blob);
+}
+
+$('lockForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const pw=$('masterPw').value; if(!pw) return;
+  ensureAudio();
+  const blob=loadVaultBlob();
+  const originalBtnText = $('lockBtn').textContent;
+  $('lockBtn').disabled=true; $('lockBtn').textContent='Working...';
+  try {
+    if(!blob) {
+      const pw2=$('masterPw2').value;
+      const email=$('accountEmail').value.trim();
+      if(!email || !email.includes('@')){ toast('Please enter a valid email','warning','warning'); return; }
+      if(pw.length<8){ toast('Password must be 8+ characters','warning','warning'); return; }
+      if(pw!==pw2){ toast('Passwords do not match','warning','warning'); return; }
+      masterPassword=pw;
+      vault={version:1,items:[],settings:{autoLockMinutes:5,sound:true,breachCheck:true,cloudEnabled:true,email,createdAt:Date.now()}};
+      await saveVault(); sfx('unlock'); showApp();
+      setTimeout(()=>toast('Account created','achievement','achievement'), 350);
+      if(cloudReady && cloudUser) {
+        // Already OAuth-authed — just push the freshly created vault to cloud
+        cloudPush(loadVaultBlob()).catch(e=>console.warn('Cloud push failed:',e));
+      } else if(loadCloudConfig()) {
+        initCloud().then(()=>cloudSyncOnUnlock(pw)).catch(e=>console.warn('Cloud init failed:',e));
+      }
+    } else {
+      try {
+        vault=await decryptVault(blob, pw);
+        if(!vault.settings) vault.settings={autoLockMinutes:5,sound:true};
+        if(vault.settings.sound===undefined) vault.settings.sound=true;
+        if(!vault.settings.email && blob.email) vault.settings.email=blob.email;
+        // Migrate legacy plain-text cloud config into the encrypted vault, then delete it
+        const legacyCloud = localStorage.getItem(CLOUD_CONFIG_KEY_LEGACY);
+        if(legacyCloud && !vault.settings.cloudConfig) {
+          try { vault.settings.cloudConfig = JSON.parse(legacyCloud); } catch(e){}
+          localStorage.removeItem(CLOUD_CONFIG_KEY_LEGACY);
+        }
+        masterPassword=pw; sfx('unlock'); showApp();
+        await saveVault(); // persist any migrations (and strip legacy blob.email next save)
+        if(loadCloudConfig()) {
+          initCloud().then(()=>cloudSyncOnUnlock(pw)).catch(e=>console.warn('Cloud init failed:',e));
+        }
+      } catch(err) { toast('Wrong password','error','error'); $('masterPw').value=''; }
+    }
+  } finally {
+    $('lockBtn').disabled=false; $('lockBtn').textContent = originalBtnText;
+  }
+});
+
+$('importVaultBtn').addEventListener('click', importVault);
+$('importBtnSettings').addEventListener('click', importVault);
+$('welcomeImportBtn').addEventListener('click', importVault);
+$('signInChoiceBtn').addEventListener('click', () => { sfx('click'); showSignIn(); });
+$('createChoiceBtn').addEventListener('click', () => { sfx('click'); showCreate(); });
+$('backToWelcomeBtn').addEventListener('click', () => {
+  sfx('click');
+  pendingOAuthEmail = null;
+  $('accountEmail').readOnly = false; $('accountEmail').style.opacity = '';
+  showWelcome();
+});
+document.querySelectorAll('.oauth-btn[data-provider]').forEach(btn => {
+  btn.addEventListener('click', () => oauthSignIn(btn.dataset.provider));
+});
+
+$('biometricBtn').addEventListener('click', () => { sfx('click'); tryBiometricUnlock(); });
+
+$('sendVerifyEmailBtn').addEventListener('click', () => { sfx('click'); sendVerificationEmail(); });
+$('resetPasswordBtn').addEventListener('click', () => { sfx('click'); sendPasswordResetForCurrentEmail(); });
+$('changeEmailBtn').addEventListener('click', async () => {
+  sfx('click');
+  const newEmail = $('newEmailInput').value.trim();
+  if(!newEmail || !newEmail.includes('@')) { toast('Enter a valid new email','warning','warning'); return; }
+  if(!confirm('Change account email from '+(vault.settings?.email||'(none)')+' to '+newEmail+'?')) return;
+  try {
+    await changeAccountEmail(newEmail);
+    $('settingsEmail').value = newEmail;
+    $('newEmailInput').value = '';
+    updateEmailVerifiedStatus();
+    toast('Email change sent — check the new inbox to confirm','achievement','achievement');
+  } catch(e) { toast(e.message||'Could not change email','error','error'); }
+});
+
+$('setup2FABtn').addEventListener('click', async () => {
+  sfx('click');
+  const user = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
+  if(!user) { toast('Sign in to cloud first','warning','warning'); return; }
+  const phone = prompt('Enter your phone number in international format (e.g. +1 555 123 4567):');
+  if(!phone) return;
+  try {
+    const verificationId = await start2FAEnrollment(phone.trim());
+    const code = prompt('Enter the 6-digit code we just texted to '+phone+':');
+    if(!code) return;
+    await complete2FAEnrollment(verificationId, code.trim());
+    toast('2FA enabled','achievement','achievement');
+    update2FAStatus();
+  } catch(e) {
+    if(e.code === 'auth/requires-recent-login') toast('Sign out and back in, then try again','warning','warning');
+    else toast('Setup failed: '+(e.message||'unknown'),'error','error');
+  }
+});
+
+$('disable2FABtn').addEventListener('click', async () => {
+  sfx('click');
+  if(!confirm('Disable 2FA? You will only need your password to sign in afterward.')) return;
+  try {
+    await disable2FA();
+    toast('2FA disabled','system');
+    update2FAStatus();
+  } catch(e) { toast('Could not disable: '+(e.message||'unknown'),'error','error'); }
+});
+$('resetVaultBtn').addEventListener('click', () => {
+  if(!confirm('Delete EVERYTHING and start fresh? Any saved passwords will be gone forever. Continue?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  showWelcome();
+});
+$('searchInput').addEventListener('input', e => { currentSearch=e.target.value; renderList(); });
+document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => { sfx('click'); document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); tab.classList.add('active'); currentFilter=tab.dataset.filter; renderList(); }));
+$('addBtn').addEventListener('click', () => { sfx('click'); openItem(null); });
+$('closeItemBtn').addEventListener('click', () => { sfx('click'); closeItem(); });
+$('saveItemBtn').addEventListener('click', saveItem);
+$('deleteItemBtn').addEventListener('click', deleteItem);
+$('lockBtn2').addEventListener('click', () => lock());
+$('exportBtn').addEventListener('click', downloadVault);
+$('settingsBtn').addEventListener('click', () => {
+  sfx('click');
+  $('settingsDisplayName').value = vault.settings?.displayName||'';
+  pickedAvatar = vault.settings?.avatar || null;
+  renderAvatarGrid();
+  $('autoLockMins').value = vault.settings?.autoLockMinutes||5;
+  $('settingsEmail').value = vault.settings?.email||'';
+  $('newMasterPw').value=''; $('newPwStrength').style.width='0%'; $('newPwStrengthLabel').textContent='';
+  // Account info
+  $('infoCreatedAt').textContent = vault.settings?.createdAt ? new Date(vault.settings.createdAt).toLocaleString() : '—';
+  $('infoItemCount').textContent = (vault.items?.length || 0).toString();
+  $('infoDevice').textContent = detectDevice();
+  $('infoStorage').textContent = formatBytes(calcStorageUsed());
+  // Toggles
+  const t=$('soundToggle');
+  if(vault.settings?.sound!==false){ t.classList.add('on'); t.dataset.on='true'; } else { t.classList.remove('on'); t.dataset.on='false'; }
+  const b=$('breachToggle');
+  if(vault.settings?.breachCheck!==false){ b.classList.add('on'); b.dataset.on='true'; } else { b.classList.remove('on'); b.dataset.on='false'; }
+  const bio=$('biometricToggle');
+  if(isBiometricEnrolled()){ bio.classList.add('on'); bio.dataset.on='true'; } else { bio.classList.remove('on'); bio.dataset.on='false'; }
+  $('newEmailInput').value = '';
+  updateEmailVerifiedStatus();
+  update2FAStatus();
+  updateCloudStatus();
+  $('settingsModal').classList.add('active');
+});
+
+$('breachToggle').addEventListener('click', () => {
+  const t=$('breachToggle'); const on=t.dataset.on!=='true';
+  t.dataset.on=on?'true':'false'; t.classList.toggle('on', on);
+  sfx('click');
+});
+
+$('biometricToggle').addEventListener('click', async () => {
+  const t=$('biometricToggle'); const turnOn = t.dataset.on!=='true';
+  if(turnOn) {
+    if(!isBiometricSupported()){ toast('Not supported on this device','warning','warning'); return; }
+    if(location.protocol === 'file:'){ toast('Biometric needs the app to be hosted (HTTPS)','warning','warning'); return; }
+    try {
+      await enableBiometric(masterPassword);
+      t.dataset.on='true'; t.classList.add('on');
+      toast('Biometric enabled','achievement','achievement');
+    } catch(e) { toast('Setup failed: '+(e.message||'unknown'),'error','error'); }
+  } else {
+    disableBiometric();
+    t.dataset.on='false'; t.classList.remove('on');
+    toast('Biometric disabled','system');
+  }
+});
+
+$('newMasterPw').addEventListener('input', () => {
+  const s = passwordStrength($('newMasterPw').value);
+  const bar = $('newPwStrength');
+  bar.style.width = (s.score*25)+'%';
+  bar.style.background = s.color;
+  $('newPwStrengthLabel').innerHTML = s.label ? `<span style="color:${s.color};text-shadow:0 0 6px ${s.color};">${s.label}</span> <span style="color:var(--text-dim);">~${s.entropy} bits</span>` : '';
+});
+$('soundToggle').addEventListener('click', () => {
+  const t=$('soundToggle'); const on = t.dataset.on!=='true';
+  t.dataset.on = on?'true':'false'; t.classList.toggle('on', on);
+  soundEnabled=on; if(on) sfx('click');
+});
+$('closeSettingsBtn').addEventListener('click', () => { sfx('click'); $('settingsModal').classList.remove('active'); });
+$('downloadVaultBtn').addEventListener('click', downloadVault);
+$('saveSettingsBtn').addEventListener('click', async () => {
+  const m=parseInt($('autoLockMins').value, 10);
+  if(m>0) vault.settings.autoLockMinutes=m;
+  vault.settings.sound = $('soundToggle').dataset.on==='true';
+  soundEnabled=vault.settings.sound;
+  vault.settings.breachCheck = $('breachToggle').dataset.on==='true';
+  // Profile
+  vault.settings.displayName = $('settingsDisplayName').value.trim() || null;
+  vault.settings.avatar = pickedAvatar || null;
+  // Email
+  const emailVal = $('settingsEmail').value.trim();
+  if(emailVal && !emailVal.includes('@')){ toast('Please enter a valid email','warning','warning'); return; }
+  vault.settings.email = emailVal || null;
+  const newPw=$('newMasterPw').value;
+  if(newPw){ if(newPw.length<8){ toast('Password must be 8+ characters','warning','warning'); return; } if(!confirm('Change master password? Make sure you remember it — there is no recovery.')) return; masterPassword=newPw; }
+  await saveVault();
+  updateHeaderProfile();
+  $('settingsModal').classList.remove('active');
+  toast('Settings saved','achievement','save');
+});
+$('wipeBtn').addEventListener('click', () => {
+  if(!confirm('Delete the vault from this device? Make sure you saved a backup first. There is no recovery.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(DISPLAY_NAME_KEY);
+  disableBiometric();
+  sfx('delete'); lock(true);
+  setTimeout(()=>toast('Vault deleted from this device','warning'), 100);
+});
+
+// ==================== CLOUD SYNC (Firebase) ====================
+const CLOUD_CONFIG_KEY_LEGACY='securebubba_cloud_config_v1'; // kept only for migration
+let cloudReady=false, cloudUser=null, lastSyncTime=null;
+
+// Cloud sync uses the built-in Firebase project unless the user opted out (cloudEnabled === false).
+// A custom config (vault.settings.cloudConfig) overrides the built-in one for advanced users.
+function loadCloudConfig(){
+  if(vault?.settings?.cloudEnabled === false) return null;
+  return vault?.settings?.cloudConfig || BUILTIN_FIREBASE_CONFIG;
+}
+function saveCloudConfig(c){ if(vault?.settings) vault.settings.cloudConfig = c; }
+function clearCloudConfig(){ if(vault?.settings) vault.settings.cloudConfig = null; }
+
+function loadScript(src) {
+  return new Promise((resolve,reject) => {
+    if(document.querySelector(`script[src="${src}"]`)){ resolve(); return; }
+    const s=document.createElement('script'); s.src=src;
+    s.onload=resolve; s.onerror=()=>reject(new Error('Could not load Firebase. Check internet.'));
+    document.head.appendChild(s);
+  });
+}
+async function ensureFirebaseLoaded() {
+  if(window.firebase && firebase.firestore) return;
+  const v='10.7.1';
+  await loadScript(`https://www.gstatic.com/firebasejs/${v}/firebase-app-compat.js`);
+  await loadScript(`https://www.gstatic.com/firebasejs/${v}/firebase-auth-compat.js`);
+  await loadScript(`https://www.gstatic.com/firebasejs/${v}/firebase-firestore-compat.js`);
+}
+
+async function deriveFirebasePassword(masterPw, email) {
+  const enc=new TextEncoder();
+  const baseKey=await crypto.subtle.importKey('raw', enc.encode(masterPw), 'PBKDF2', false, ['deriveBits']);
+  const bits=await crypto.subtle.deriveBits(
+    { name:'PBKDF2', salt: enc.encode((email||'')+':securebubba-firebase'), iterations:100000, hash:'SHA-256' },
+    baseKey, 256
+  );
+  return b64e(new Uint8Array(bits));
+}
+
+async function initCloud() {
+  const config=loadCloudConfig();
+  if(!config) return false;
+  await ensureFirebaseLoaded();
+  if(!firebase.apps.length) firebase.initializeApp(config);
+  cloudReady=true;
+  return true;
+}
+
+async function cloudSignInOrCreate(email, masterPw) {
+  if(!cloudReady) throw new Error('Cloud not initialized');
+  const fbPw=await deriveFirebasePassword(masterPw, email);
+  try {
+    const cred=await firebase.auth().signInWithEmailAndPassword(email, fbPw);
+    cloudUser=cred.user; return { existing:true };
+  } catch(e) {
+    if(e.code==='auth/user-not-found' || e.code==='auth/invalid-credential') {
+      const cred=await firebase.auth().createUserWithEmailAndPassword(email, fbPw);
+      cloudUser=cred.user; return { existing:false };
+    }
+    throw e;
+  }
+}
+
+async function cloudPush(blob) {
+  if(!cloudUser) return;
+  await firebase.firestore().collection('vaults').doc(cloudUser.uid).set({
+    blob: JSON.stringify(blob), savedAt: blob.savedAt || Date.now()
+  });
+  lastSyncTime=Date.now();
+}
+async function cloudPull() {
+  if(!cloudUser) return null;
+  const snap=await firebase.firestore().collection('vaults').doc(cloudUser.uid).get();
+  if(!snap.exists) return null;
+  const d=snap.data();
+  return { blob: JSON.parse(d.blob), savedAt: d.savedAt };
+}
+
+async function cloudSyncOnUnlock(masterPw) {
+  if(!cloudReady) return;
+  try {
+    const email=vault.settings?.email;
+    if(!email){ console.warn('No email — cloud sync skipped'); return; }
+    await cloudSignInOrCreate(email, masterPw);
+    const cloud=await cloudPull();
+    const local=loadVaultBlob();
+    const localTime=local?.savedAt||0;
+    if(cloud && cloud.savedAt > localTime) {
+      const newVault=await decryptVault(cloud.blob, masterPw);
+      vault=newVault;
+      if(!vault.settings) vault.settings={autoLockMinutes:5,sound:true};
+      if(vault.settings.sound===undefined) vault.settings.sound=true;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cloud.blob));
+      lastSyncTime=Date.now();
+      renderList();
+      toast('Synced from cloud','intel','copy');
+    } else if(!cloud || cloud.savedAt < localTime) {
+      if(local) await cloudPush(local);
+    } else {
+      lastSyncTime=Date.now();
+    }
+  } catch(e) {
+    console.warn('Cloud sync failed:', e);
+    toast('Cloud sync failed: '+(e.message||'unknown'),'warning','warning');
+  }
+}
+
+function updateCloudStatus() {
+  const enabled = vault?.settings?.cloudEnabled !== false;
+  const t = $('cloudToggle');
+  if(t){
+    if(enabled){ t.classList.add('on'); t.dataset.on='true'; }
+    else { t.classList.remove('on'); t.dataset.on='false'; }
+  }
+  const status = $('cloudStatus');
+  if(!status) return;
+  if(!enabled) { status.textContent = 'Cloud sync is off. Toggle on to sync across devices.'; return; }
+  if(!cloudReady) { status.textContent = 'Connecting to cloud...'; return; }
+  if(lastSyncTime){
+    const ago=Math.round((Date.now()-lastSyncTime)/1000);
+    status.textContent = ago<60 ? `Connected. Last synced ${ago}s ago.` : `Connected. Last synced ${Math.round(ago/60)}m ago.`;
+  } else {
+    status.textContent = 'Connected. Not synced yet this session.';
+  }
+}
+
+$('cloudToggle').addEventListener('click', async () => {
+  const t=$('cloudToggle'); const on = t.dataset.on!=='true';
+  t.dataset.on = on?'true':'false'; t.classList.toggle('on', on);
+  vault.settings.cloudEnabled = on;
+  sfx('click');
+  if(on){
+    // turning on — connect now
+    try {
+      await initCloud();
+      if(masterPassword) await cloudSyncOnUnlock(masterPassword);
+    } catch(e) { console.warn('Cloud connect failed:', e); }
+  } else {
+    // turning off — sign out
+    try { if(window.firebase?.auth) await firebase.auth().signOut(); } catch(e){}
+    cloudReady=false; cloudUser=null; lastSyncTime=null;
+  }
+  await saveVault();
+  updateCloudStatus();
+});
+
+$('syncNowBtn').addEventListener('click', async () => {
+  if(vault?.settings?.cloudEnabled === false){ toast('Cloud sync is off','warning','warning'); return; }
+  $('syncNowBtn').disabled=true; $('syncNowBtn').textContent='Syncing...';
+  try {
+    if(!cloudReady) await initCloud();
+    await cloudSyncOnUnlock(masterPassword);
+    updateCloudStatus();
+  } catch(e) { toast('Sync failed: '+(e.message||'unknown'),'error','error'); }
+  finally { $('syncNowBtn').disabled=false; $('syncNowBtn').textContent='↻ Sync Now'; }
+});
+
+setInterval(async () => {
+  const totpInput=$('f_totp');
+  if(!totpInput || !$('itemModal').classList.contains('active')) return;
+  const v=totpInput.value.trim(); if(!v) return;
+  const t=await totp(v); const preview=$('totpPreview');
+  if(!t || !preview) return;
+  const pct = ((t.period-t.secondsLeft)/t.period)*360;
+  preview.innerHTML = `<div class="totp-display" id="totpCopyTarget"><div class="totp-code">${t.code.replace(/(\d{3})(\d{3})/, '$1 $2')}</div><div class="totp-timer" style="background: conic-gradient(var(--neon-pink) ${pct}deg, var(--surface-3) ${pct}deg);"><span>${t.secondsLeft}</span></div></div>`;
+  const target = document.getElementById('totpCopyTarget');
+  if(target) target.onclick = () => copyToClipboard(t.code, '2FA code copied');
+}, 1000);
+
+init();
+</script>
+</body>
+</html>
