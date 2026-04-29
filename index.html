@@ -230,6 +230,7 @@ h3 { font-size: 15px; color: var(--neon-pink); letter-spacing: 0; margin-bottom:
     <div id="recaptchaContainer" style="margin-top:8px;"></div>
   </div>
   <form id="lockForm" style="display:none;width:100%;max-width:400px;">
+    <input type="text" id="accountName" placeholder="First and last name" autocomplete="name" maxlength="60" style="display:none;margin-bottom:10px;">
     <input type="email" id="accountEmail" placeholder="Email" autocomplete="email" style="display:none;margin-bottom:10px;">
     <input type="password" id="masterPw" placeholder="Master password" autocomplete="current-password" required>
     <input type="password" id="masterPw2" placeholder="Confirm password" style="display:none;" autocomplete="new-password">
@@ -484,6 +485,7 @@ const STORAGE_KEY='securebubba_blob_v1';
 
 function uuid() { return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c/4).toString(16)); }
 const DISPLAY_NAME_KEY = 'sb_display_name_v1';
+function firstName(fullName) { return (fullName||'').trim().split(/\s+/)[0] || ''; }
 async function saveVault() {
   const blob=await encryptVault(vault, masterPassword);
   blob.savedAt = Date.now();
@@ -520,7 +522,7 @@ function showWelcome() {
   const blob = loadVaultBlob();
   const name = localStorage.getItem(DISPLAY_NAME_KEY);
   $('lockTitle').textContent='SECUREBUBBA';
-  $('lockSubtitle').textContent = blob ? (name ? 'Welcome back, '+name : 'Welcome back') : 'Welcome';
+  $('lockSubtitle').textContent = blob ? (name ? 'Welcome back, '+firstName(name) : 'Welcome back') : 'Welcome';
   $('welcomeChoices').style.display='block';
   $('lockForm').style.display='none';
   $('phonePanel').style.display='none';
@@ -530,12 +532,14 @@ function showSignIn() {
   const blob = loadVaultBlob();
   if(!blob){ toast('No account on this device yet — tap Create new account first','warning','warning'); return; }
   $('lockTitle').textContent='SIGN IN';
-  $('lockSubtitle').textContent = 'Enter your master password';
+  const name = localStorage.getItem(DISPLAY_NAME_KEY);
+  $('lockSubtitle').textContent = name ? 'Welcome back, '+firstName(name)+'!' : 'Enter your master password';
   $('welcomeChoices').style.display='none';
   $('lockForm').style.display='block';
-  $('masterPw').value=''; $('masterPw2').value=''; $('accountEmail').value='';
+  $('masterPw').value=''; $('masterPw2').value=''; $('accountEmail').value=''; $('accountName').value='';
   $('masterPw2').style.display='none';
   $('accountEmail').style.display='none';
+  $('accountName').style.display='none';
   $('masterPw').placeholder='Master password';
   $('lockBtn').textContent='Unlock';
   $('resetVaultBtn').style.display='block';
@@ -546,17 +550,18 @@ function showCreate() {
   const blob = loadVaultBlob();
   if(blob){ if(!confirm('You already have an account on this device. Creating a new one will delete the old account and any saved passwords. Continue?')) return; localStorage.removeItem(STORAGE_KEY); }
   $('lockTitle').textContent='CREATE ACCOUNT';
-  $('lockSubtitle').textContent='Enter your email and pick a master password';
+  $('lockSubtitle').textContent='Enter your name, email, and pick a master password';
   $('welcomeChoices').style.display='none';
   $('lockForm').style.display='block';
-  $('masterPw').value=''; $('masterPw2').value=''; $('accountEmail').value='';
+  $('masterPw').value=''; $('masterPw2').value=''; $('accountEmail').value=''; $('accountName').value='';
   $('masterPw2').style.display='block';
   $('accountEmail').style.display='block';
+  $('accountName').style.display='block';
   $('masterPw').placeholder='New master password';
   $('lockBtn').textContent='Create Account';
   $('resetVaultBtn').style.display='none';
   $('importVaultBtn').style.display='none';
-  setTimeout(()=>$('accountEmail').focus(), 100);
+  setTimeout(()=>$('accountName').focus(), 100);
 }
 function lock(silent) {
   masterPassword=null; vault={version:1,items:[],settings:{autoLockMinutes:5,sound:true}};
@@ -1104,6 +1109,9 @@ async function checkOAuthRedirect() {
 async function handleOAuthSuccess(user) {
   pendingOAuthEmail = user.email;
   toast('Signed in as '+user.email, 'system', 'copy');
+  // Cache the Google display name so the welcome screen can greet by name
+  const googleName = user.displayName || '';
+  if(googleName) localStorage.setItem(DISPLAY_NAME_KEY, googleName);
   // Pull cloud vault for this user
   let cloudBlob = null;
   try {
@@ -1116,15 +1124,19 @@ async function handleOAuthSuccess(user) {
     // Existing vault — replace local with cloud, ask for master password
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cloudBlob));
     showSignIn();
-    $('lockSubtitle').textContent = 'Enter your master password for '+user.email;
+    $('lockSubtitle').textContent = googleName ? 'Welcome back, '+firstName(googleName)+'!' : 'Enter your master password for '+user.email;
   } else {
-    // No cloud vault — create new one
+    // No cloud vault — create new one. Use Google name + email automatically.
     localStorage.removeItem(STORAGE_KEY);
     showCreate();
+    $('accountName').value = googleName;
+    $('accountName').readOnly = true;
+    $('accountName').style.opacity = '0.6';
     $('accountEmail').value = user.email;
     $('accountEmail').readOnly = true;
     $('accountEmail').style.opacity = '0.6';
-    $('lockSubtitle').textContent = 'Create your master password for '+user.email;
+    $('lockSubtitle').textContent = googleName ? 'Welcome '+firstName(googleName)+'! Create your master password.' : 'Create your master password for '+user.email;
+    setTimeout(()=>$('masterPw').focus(), 120);
   }
 }
 
@@ -1146,11 +1158,13 @@ $('lockForm').addEventListener('submit', async (e) => {
     if(!blob) {
       const pw2=$('masterPw2').value;
       const email=$('accountEmail').value.trim();
+      const displayName=$('accountName').value.trim();
+      if(!displayName){ toast('Please enter your name','warning','warning'); return; }
       if(!email || !email.includes('@')){ toast('Please enter a valid email','warning','warning'); return; }
       if(pw.length<8){ toast('Password must be 8+ characters','warning','warning'); return; }
       if(pw!==pw2){ toast('Passwords do not match','warning','warning'); return; }
       masterPassword=pw;
-      vault={version:1,items:[],settings:{autoLockMinutes:5,sound:true,breachCheck:true,cloudEnabled:true,email,createdAt:Date.now()}};
+      vault={version:1,items:[],settings:{autoLockMinutes:5,sound:true,breachCheck:true,cloudEnabled:true,email,displayName,createdAt:Date.now()}};
       await saveVault(); sfx('unlock'); showApp();
       setTimeout(()=>toast('Account created','achievement','achievement'), 350);
       if(cloudReady && cloudUser) {
@@ -1192,6 +1206,7 @@ $('backToWelcomeBtn').addEventListener('click', () => {
   sfx('click');
   pendingOAuthEmail = null;
   $('accountEmail').readOnly = false; $('accountEmail').style.opacity = '';
+  $('accountName').readOnly = false; $('accountName').style.opacity = '';
   showWelcome();
 });
 document.querySelectorAll('.oauth-btn[data-provider]').forEach(btn => {
