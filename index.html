@@ -1017,6 +1017,10 @@ function getOAuthProvider(name) {
   }
 }
 
+function isMobileDevice() {
+  return /iPad|iPhone|iPod|Android|Mobile|Tablet/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+}
+
 async function oauthSignIn(name) {
   try {
     sfx('click');
@@ -1029,7 +1033,14 @@ async function oauthSignIn(name) {
     await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     const provider = getOAuthProvider(name);
 
-    // Try popup first (much more reliable on desktop than redirect)
+    // On mobile (iPad/iPhone/Android), popups are blocked. Go straight to redirect.
+    if(isMobileDevice()) {
+      sessionStorage.setItem('sb_oauth_pending', '1');
+      await firebase.auth().signInWithRedirect(provider);
+      return;
+    }
+
+    // Desktop: try popup first (more reliable, no full-page redirect)
     try {
       const result = await firebase.auth().signInWithPopup(provider);
       if(result && result.user) {
@@ -1039,8 +1050,8 @@ async function oauthSignIn(name) {
         return;
       }
     } catch(popupErr) {
-      // Popup blocked or unsupported — fall back to redirect (mobile / blocked popups)
-      if(['auth/popup-blocked','auth/popup-closed-by-user','auth/cancelled-popup-request','auth/operation-not-supported-in-this-environment'].includes(popupErr.code)) {
+      // Popup blocked or unsupported — fall back to redirect
+      if(['auth/popup-blocked','auth/popup-closed-by-user','auth/cancelled-popup-request','auth/operation-not-supported-in-this-environment','auth/web-storage-unsupported'].includes(popupErr.code)) {
         sessionStorage.setItem('sb_oauth_pending', '1');
         await firebase.auth().signInWithRedirect(provider);
         return;
