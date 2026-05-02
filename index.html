@@ -481,6 +481,7 @@ function sfx(name) {
 let masterPassword=null;
 let vault={ version:1, items:[], settings:{ autoLockMinutes:5, sound:true } };
 let currentFilter='all', currentSearch='', currentItemId=null, autoLockTimer=null, clipboardClearTimer=null;
+let lockMode='signin'; // 'signin' or 'create'
 const STORAGE_KEY='securebubba_blob_v1';
 
 function uuid() { return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c/4).toString(16)); }
@@ -529,24 +530,32 @@ function showWelcome() {
   $('biometricBtn').style.display = (isBiometricSupported() && isBiometricEnrolled() && blob) ? 'block' : 'none';
 }
 function showSignIn() {
+  lockMode = 'signin';
   const blob = loadVaultBlob();
-  if(!blob){ toast('No account on this device yet — tap Create new account first','warning','warning'); return; }
   $('lockTitle').textContent='SIGN IN';
   const name = localStorage.getItem(DISPLAY_NAME_KEY);
-  $('lockSubtitle').textContent = name ? 'Welcome back, '+firstName(name)+'!' : 'Enter your master password';
+  if(blob) {
+    $('lockSubtitle').textContent = name ? 'Welcome back, '+firstName(name)+'!' : 'Enter your master password';
+  } else {
+    $('lockSubtitle').textContent = 'Sign in with your email and master password';
+  }
   $('welcomeChoices').style.display='none';
   $('lockForm').style.display='block';
   $('masterPw').value=''; $('masterPw2').value=''; $('accountEmail').value=''; $('accountName').value='';
   $('masterPw2').style.display='none';
-  $('accountEmail').style.display='none';
+  // No local vault → show email field for cross-device sign-in
+  $('accountEmail').style.display = blob ? 'none' : 'block';
+  $('accountEmail').readOnly = false;
+  $('accountEmail').style.opacity = '';
   $('accountName').style.display='none';
   $('masterPw').placeholder='Master password';
   $('lockBtn').textContent='Unlock';
-  $('resetVaultBtn').style.display='block';
+  $('resetVaultBtn').style.display = blob ? 'block' : 'none';
   $('importVaultBtn').style.display='none';
-  setTimeout(()=>$('masterPw').focus(), 100);
+  setTimeout(()=>(blob ? $('masterPw') : $('accountEmail')).focus(), 100);
 }
 function showCreate() {
+  lockMode = 'create';
   const blob = loadVaultBlob();
   if(blob){ if(!confirm('You already have an account on this device. Creating a new one will delete the old account and any saved passwords. Continue?')) return; localStorage.removeItem(STORAGE_KEY); }
   $('lockTitle').textContent='CREATE ACCOUNT';
@@ -1166,7 +1175,7 @@ $('lockForm').addEventListener('submit', async (e) => {
   const originalBtnText = $('lockBtn').textContent;
   $('lockBtn').disabled=true; $('lockBtn').textContent='Working...';
   try {
-    if(!blob) {
+    if(lockMode === 'create') {
       const pw2=$('masterPw2').value;
       const email=$('accountEmail').value.trim();
       const displayName=$('accountName').value.trim();
@@ -1179,29 +1188,64 @@ $('lockForm').addEventListener('submit', async (e) => {
       await saveVault(); sfx('unlock'); showApp();
       setTimeout(()=>toast('Account created','achievement','achievement'), 350);
       if(cloudReady && cloudUser) {
-        // Already OAuth-authed — just push the freshly created vault to cloud
         cloudPush(loadVaultBlob()).catch(e=>console.warn('Cloud push failed:',e));
       } else if(loadCloudConfig()) {
         initCloud().then(()=>cloudSyncOnUnlock(pw)).catch(e=>console.warn('Cloud init failed:',e));
       }
-    } else {
+    } else if(blob) {
+      // Local sign-in: decrypt local vault
       try {
         vault=await decryptVault(blob, pw);
         if(!vault.settings) vault.settings={autoLockMinutes:5,sound:true};
         if(vault.settings.sound===undefined) vault.settings.sound=true;
         if(!vault.settings.email && blob.email) vault.settings.email=blob.email;
-        // Migrate legacy plain-text cloud config into the encrypted vault, then delete it
         const legacyCloud = localStorage.getItem(CLOUD_CONFIG_KEY_LEGACY);
         if(legacyCloud && !vault.settings.cloudConfig) {
           try { vault.settings.cloudConfig = JSON.parse(legacyCloud); } catch(e){}
           localStorage.removeItem(CLOUD_CONFIG_KEY_LEGACY);
         }
         masterPassword=pw; sfx('unlock'); showApp();
-        await saveVault(); // persist any migrations (and strip legacy blob.email next save)
+        await saveVault();
         if(loadCloudConfig()) {
           initCloud().then(()=>cloudSyncOnUnlock(pw)).catch(e=>console.warn('Cloud init failed:',e));
         }
       } catch(err) { toast('Wrong password','error','error'); $('masterPw').value=''; }
+    } else {
+      // Cross-device sign-in: no local vault, pull from cloud
+      const email = $('accountEmail').value.trim();
+      if(!email || !email.includes('@')){ toast('Please enter a valid email','warning','warning'); return; }
+      try {
+        await ensureFirebaseLoaded();
+        if(!firebase.apps.length) firebase.initializeApp(BUILTIN_FIREBASE_CONFIG);
+        await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+        // Authenticate with derived Firebase password
+        const fbPw = await deriveFirebasePassword(pw, email);
+        const cred = await firebase.auth().signInWithEmailAndPassword(email, fbPw);
+        cloudUser = cred.user;
+        cloudReady = true;
+        // Pull the cloud vault
+        const cloud = await cloudPull();
+        if(!cloud || !cloud.blob) { toast('No cloud vault found for this email','error','error'); return; }
+        // Save cloud blob locally and decrypt
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cloud.blob));
+        vault = await decryptVault(cloud.blob, pw);
+        if(!vault.settings) vault.settings={autoLockMinutes:5,sound:true};
+        if(vault.settings.sound===undefined) vault.settings.sound=true;
+        if(!vault.settings.email) vault.settings.email = email;
+        masterPassword = pw;
+        await saveVault();
+        sfx('unlock'); showApp();
+        setTimeout(()=>toast('Signed in from cloud','achievement','achievement'), 200);
+      } catch(err) {
+        if(err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found') {
+          toast('Wrong email or master password','error','error');
+        } else if(err.code === 'auth/too-many-requests') {
+          toast('Too many attempts — wait and try again','error','error');
+        } else {
+          toast('Sign-in failed: '+(err.message||'unknown'),'error','error');
+        }
+        $('masterPw').value='';
+      }
     }
   } finally {
     $('lockBtn').disabled=false; $('lockBtn').textContent = originalBtnText;
