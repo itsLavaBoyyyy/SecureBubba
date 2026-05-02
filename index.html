@@ -1033,15 +1033,15 @@ async function oauthSignIn(name) {
       toast('Social sign-in needs the app to be hosted on a website. See setup guide.', 'warning', 'warning');
       return;
     }
-    await ensureFirebaseLoaded();
-    if(!firebase.apps.length) firebase.initializeApp(BUILTIN_FIREBASE_CONFIG);
-    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    if(!window.firebase || !firebase.auth) {
+      toast('Still loading. Try again in a moment.', 'warning', 'warning');
+      return;
+    }
     const provider = getOAuthProvider(name);
 
-    // Try popup first on every device. iPad Safari's storage partitioning (ITP)
-    // breaks signInWithRedirect across the firebaseapp.com auth handler, but
-    // user-initiated popups still work. Fall back to redirect only if the
-    // popup is actually blocked.
+    // Open popup synchronously in the user-gesture handler — iPad Safari blocks
+    // popups if any await runs before signInWithPopup. Firebase + persistence
+    // are pre-warmed in init() so this can run immediately on tap.
     try {
       const result = await firebase.auth().signInWithPopup(provider);
       if(result && result.user) {
@@ -1152,6 +1152,15 @@ async function handleOAuthSuccess(user) {
 }
 
 async function init() {
+  // Pre-warm Firebase + auth persistence so the OAuth popup can open
+  // synchronously on tap. Without this, iPad Safari blocks the popup because
+  // the awaits inside oauthSignIn break the user-gesture chain.
+  try {
+    await ensureFirebaseLoaded();
+    if(!firebase.apps.length) firebase.initializeApp(BUILTIN_FIREBASE_CONFIG);
+    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+  } catch(e) { console.warn('Firebase pre-warm failed:', e); }
+
   // Check if returning from OAuth redirect first
   const handledOAuth = await checkOAuthRedirect();
   if(handledOAuth) return;
